@@ -611,11 +611,11 @@
       <span class="upload-icon">🎨</span>
       <div class="upload-sub">
         <strong>DESIGN IMAGE</strong>
-        複数画像タップまたはドロップ（最大15枚）
+        複数画像タップまたはドロップ（最大5枚）
       </div>
     </div>
     <div id="imagePreviewGrid" style="display:none;margin-top:10px;"></div>
-    <div style="font-size:10px;color:var(--text-dim);margin-top:7px;">※ Groq Vision上限: 1枚4MB以内・最大15枚まで</div>
+    <div style="font-size:10px;color:var(--text-dim);margin-top:7px;">※ Groq Vision上限: 1枚4MB以内・最大5枚まで</div>
   </div>
 
   <!-- STEP 2 -->
@@ -736,9 +736,9 @@ function switchTab(tab) { /* タブUI廃止 */ }
     const arr = Array.from(files).filter(f => f.type.startsWith('image/'));
     if (!arr.length) return;
 
-    const remaining = 15 - designImages.length;
+    const remaining = 5 - designImages.length;
     if (remaining <= 0) {
-      showError('画像は最大15枚までです。');
+      showError('画像は最大5枚までです。');
       return;
     }
     const toAdd = arr.slice(0, remaining);
@@ -758,7 +758,7 @@ function switchTab(tab) { /* タブUI廃止 */ }
     });
 
     if (arr.length > remaining) {
-      showError(`15枚制限のため ${arr.length - remaining} 枚スキップしました。`);
+      showError(`5枚制限のため ${arr.length - remaining} 枚スキップしました。`);
     }
   };
 
@@ -788,7 +788,7 @@ function renderPreviews() {
       </div>
     `).join('')
   }</div>
-  <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--accent);margin-top:6px;">${designImages.length}/15 枚</div>`;
+  <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--accent);margin-top:6px;">${designImages.length}/5 枚</div>`;
 }
 
 function removeImage(idx) {
@@ -923,6 +923,27 @@ function getAllCodeWithHeaders(tab) {
     .join('\n\n');
 }
 
+// コードを圧縮してトークン数を削減
+function compressCode(code, maxChars = 3000) {
+  if (!code) return '';
+  let compressed = code
+    // 複数の空白行を1行に
+    .replace(/\n{3,}/g, '\n\n')
+    // 行頭の過剰なインデントを削減（4スペース→2スペース）
+    .replace(/^    /gm, '  ')
+    .replace(/^        /gm, '    ')
+    // 単行コメントを除去（URLは残す）
+    .replace(/^\s*\/\/(?!.*https?:\/\/).*$/gm, '')
+    // CSSの複数空白を1つに
+    .replace(/  +/g, ' ')
+    .trim();
+  // 上限を超えたら切り詰めて通知
+  if (compressed.length > maxChars) {
+    compressed = compressed.slice(0, maxChars) + '\n/* ... (省略) */';
+  }
+  return compressed;
+}
+
 // ── Generate Code ─────────────────────────────────
 async function generateCode() {
   const groqKey = getGroqKey();
@@ -953,9 +974,9 @@ async function generateCode() {
 
   // 既存コードをコンテキストとして提供
   let existingContext = '';
-  if (htmlCode) existingContext += `\n\n【既存HTML】\n\`\`\`html\n${htmlCode}\n\`\`\``;
-  if (cssCode)  existingContext += `\n\n【既存CSS/SCSS】\n\`\`\`css\n${getAllCodeWithHeaders('css')}\n\`\`\``;
-  if (jsCode)   existingContext += `\n\n【既存JavaScript】\n\`\`\`js\n${jsCode}\n\`\`\``;
+  if (htmlCode) existingContext += `\n\n【既存HTML】\n\`\`\`html\n${compressCode(htmlCode,2000)}\n\`\`\``;
+  if (cssCode)  existingContext += `\n\n【既存CSS/SCSS】\n\`\`\`css\n${compressCode(getAllCodeWithHeaders('css'),2000)}\n\`\`\``;
+  if (jsCode)   existingContext += `\n\n【既存JavaScript】\n\`\`\`js\n${compressCode(jsCode,1500)}\n\`\`\``;
 
   const targets = [
     needHtml && 'HTML',
@@ -1096,10 +1117,15 @@ async function analyze() {
   document.getElementById('results').classList.remove('show');
   fixedHtmlContent = null;
 
+  // トークン削減のためコードを圧縮（各3000文字上限）
+  const htmlComp = compressCode(htmlCode, 3000);
+  const cssComp  = compressCode(getAllCodeWithHeaders('css'), 3000);
+  const jsComp   = compressCode(jsCode, 2000);
+
   let codeSection = '';
-  if (htmlCode) codeSection += `\n\n【HTML】\n\`\`\`html\n${htmlCode}\n\`\`\``;
-  if (cssCode)  codeSection += `\n\n【CSS/SCSS】\n\`\`\`css\n${getAllCodeWithHeaders('css')}\n\`\`\``;
-  if (jsCode)   codeSection += `\n\n【JavaScript】\n\`\`\`js\n${jsCode}\n\`\`\``;
+  if (htmlComp) codeSection += `\n\n【HTML】\n\`\`\`html\n${htmlComp}\n\`\`\``;
+  if (cssComp)  codeSection += `\n\n【CSS/SCSS】\n\`\`\`css\n${cssComp}\n\`\`\``;
+  if (jsComp)   codeSection += `\n\n【JavaScript】\n\`\`\`js\n${jsComp}\n\`\`\``;
 
   const useVision = designImages.length > 0;
   const model = useVision ? 'meta-llama/llama-4-scout-17b-16e-instruct' : 'llama-3.3-70b-versatile';
