@@ -488,6 +488,37 @@
   }
   .add-file-btn:hover { border-color: var(--accent); color: var(--accent); }
 
+  /* コード生成ボタン */
+  .generate-btn {
+    width: 100%;
+    padding: 13px;
+    background: linear-gradient(135deg, #0f4c35, #1a6b4a);
+    color: var(--accent);
+    border: 1px solid rgba(0,255,136,0.3);
+    border-radius: 10px;
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: all 0.2s;
+    margin-bottom: 10px;
+  }
+  .generate-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #1a6b4a, #22885e);
+    box-shadow: 0 6px 24px rgba(0,255,136,0.15);
+    transform: translateY(-1px);
+  }
+  .generate-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  .generate-note {
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+    line-height: 1.6;
+  }
+  .generate-note span { color: var(--accent); }
+
   /* 複数画像プレビュー */
   .image-preview-grid {
     display: grid;
@@ -608,6 +639,13 @@
   </div>
 
   <div class="warn-box" id="warnBox"></div>
+
+  <button class="generate-btn" id="generateBtn" onclick="generateCode()">✨ コードをゼロから生成する（画像→コード）</button>
+  <div class="generate-note">
+    ※ デザイン画像があればHTMLとCSSを自動生成してSTEP2に挿入します。<br>
+    ※ 一部のファイルが空の場合、既存コードを参考に不足分を補完生成します。<br>
+    ※ 生成後は内容を確認してから「<span>AIでズレを分析する</span>」を実行してください。
+  </div>
 
   <button class="analyze-btn" id="analyzeBtn" onclick="analyze()">🔍 AIでズレを分析する</button>
   <div class="model-info">Powered by <span>Groq</span> · Vision: llama-4-scout / Text: llama-3.3-70b</div>
@@ -872,6 +910,159 @@ function getAllCodeWithHeaders(tab) {
       return `/* --- ${fname} --- */\n${f.code.trim()}`;
     })
     .join('\n\n');
+}
+
+// ── Generate Code ─────────────────────────────────
+async function generateCode() {
+  const groqKey = getGroqKey();
+  if (!groqKey) { showError('⚙️ APIキーを設定してください。'); return; }
+
+  const htmlCode = getAllCode('html');
+  const cssCode  = getAllCode('css');
+  const jsCode   = getAllCode('js');
+  const hasImage = designImages.length > 0;
+
+  if (!hasImage && !htmlCode && !cssCode && !jsCode) {
+    showError('デザイン画像か既存コードを少なくとも1つ入力してください。');
+    return;
+  }
+
+  // 何を生成するか判断
+  const needHtml = !htmlCode;
+  const needCss  = !cssCode;
+  const needJs   = !jsCode;
+
+  if (!needHtml && !needCss && !needJs) {
+    showError('全タブにコードが入力済みです。生成するファイルがありません。');
+    return;
+  }
+
+  const useVision = hasImage;
+  const model = useVision ? 'meta-llama/llama-4-scout-17b-16e-instruct' : 'llama-3.3-70b-versatile';
+
+  // 既存コードをコンテキストとして提供
+  let existingContext = '';
+  if (htmlCode) existingContext += `\n\n【既存HTML】\n\`\`\`html\n${htmlCode}\n\`\`\``;
+  if (cssCode)  existingContext += `\n\n【既存CSS/SCSS】\n\`\`\`css\n${getAllCodeWithHeaders('css')}\n\`\`\``;
+  if (jsCode)   existingContext += `\n\n【既存JavaScript】\n\`\`\`js\n${jsCode}\n\`\`\``;
+
+  const targets = [
+    needHtml && 'HTML',
+    needCss  && 'CSS',
+    needJs   && 'JavaScript'
+  ].filter(Boolean).join('・');
+
+  const prompt = `あなたはプロのWebフロントエンドエンジニアです。${existingContext}
+
+${hasImage ? 'デザインカンプ画像を参考に、' : '既存コードを参考に、'}以下のファイルを生成してください：${targets}
+
+【生成ルール】
+- 既存コードがある場合はそれと整合性が取れるように生成する
+- HTMLはセマンティックなマークアップ、CSSはモバイルファースト
+- CSSのクラス名は既存HTMLと一致させる
+- JavaScriptはバニラJS（フレームワーク不使用）
+- 以下のJSON形式のみで返答（\`\`\`不要）
+
+{
+  ${needHtml ? '"html": "生成したHTMLコード（エスケープ済み文字列）",' : ''}
+  ${needCss  ? '"css": "生成したCSSコード（エスケープ済み文字列）",' : ''}
+  ${needJs   ? '"js": "生成したJavaScriptコード（エスケープ済み文字列）",' : ''}
+  "summary": "生成内容の説明（日本語1〜2文）"
+}
+
+文字列内の改行は\nでエスケープ。JSONのみ返答。`;
+
+  let userContent;
+  if (useVision) {
+    userContent = [];
+    designImages.forEach((img, i) => {
+      userContent.push({ type: 'image_url', image_url: { url: `data:${img.type};base64,${img.b64}` } });
+      userContent.push({ type: 'text', text: `【画像${i + 1}: ${img.name}】` });
+    });
+    userContent.push({ type: 'text', text: prompt });
+  } else {
+    userContent = prompt;
+  }
+
+  // ボタンをローディング状態に
+  const btn = document.getElementById('generateBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ 生成中...';
+  document.getElementById('errorBox').classList.remove('show');
+
+  try {
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${groqKey}` },
+      body: JSON.stringify({ model, max_tokens: 4000, temperature: 0.4, messages: [{ role: 'user', content: userContent }] })
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error?.message || `HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    let text = data.choices?.[0]?.message?.content?.trim() || '';
+    text = text.replace(/```json|```/g, '').trim();
+
+    let parsed;
+    try { parsed = JSON.parse(text); }
+    catch { throw new Error('AIの応答をJSONとして解析できませんでした。再試行してください。'); }
+
+    // 生成されたコードをSTEP2の各タブに挿入
+    if (parsed.html && needHtml) {
+      const code = parsed.html.replace(/\\n/g, '\n');
+      if (files.html.length === 0) addFile('html');
+      const f = files.html[files.html.length - 1];
+      f.code = code;
+      f.name = f.name || 'index.html';
+      renderFileList('html');
+      // テキストエリアに値を反映
+      const ta = document.getElementById('file-ta-' + f.id);
+      if (ta) ta.value = code;
+    }
+
+    if (parsed.css && needCss) {
+      const code = parsed.css.replace(/\\n/g, '\n');
+      if (files.css.length === 0) addFile('css');
+      const f = files.css[files.css.length - 1];
+      f.code = code;
+      f.name = f.name || 'style.css';
+      renderFileList('css');
+      const ta = document.getElementById('file-ta-' + f.id);
+      if (ta) ta.value = code;
+    }
+
+    if (parsed.js && needJs) {
+      const code = parsed.js.replace(/\\n/g, '\n');
+      if (files.js.length === 0) addFile('js');
+      const f = files.js[files.js.length - 1];
+      f.code = code;
+      f.name = f.name || 'main.js';
+      renderFileList('js');
+      const ta = document.getElementById('file-ta-' + f.id);
+      if (ta) ta.value = code;
+    }
+
+    // 生成結果を通知
+    const summaryEl = document.getElementById('errorBox');
+    summaryEl.style.background = 'rgba(0,255,136,0.06)';
+    summaryEl.style.borderColor = 'rgba(0,255,136,0.25)';
+    summaryEl.style.color = 'var(--accent)';
+    summaryEl.textContent = '✅ 生成完了: ' + (parsed.summary || `${targets}を生成しました。`);
+    summaryEl.classList.add('show');
+
+    // 生成したタブに自動切換え
+    const firstTab = needHtml ? 'html' : needCss ? 'css' : 'js';
+    switchTab(firstTab);
+
+  } catch(err) {
+    showError(err.message || 'コード生成中にエラーが発生しました。');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '✨ コードをゼロから生成する（画像→コード）';
+  }
 }
 
 // ── Analyze ────────────────────────────────────────
