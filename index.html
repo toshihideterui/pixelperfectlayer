@@ -466,6 +466,136 @@
   }
   .reset-btn:hover { border-color: var(--text-dim); color: var(--text); }
 
+  /* Auto Fix */
+  .fix-panel {
+    display: none;
+    margin-top: 20px;
+  }
+  .fix-panel.show { display: block; }
+
+  .fix-upload-box {
+    border: 2px dashed var(--border);
+    border-radius: 10px;
+    padding: 24px 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--surface2);
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+  .fix-upload-box:hover, .fix-upload-box.dragover {
+    border-color: #a855f7;
+    background: rgba(168,85,247,0.05);
+  }
+  .fix-upload-box input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+  }
+  .fix-upload-label { font-size: 12px; color: var(--text-dim); }
+  .fix-upload-label strong {
+    color: #a855f7;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    display: block;
+    margin-bottom: 4px;
+  }
+  .fix-file-name {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: #a855f7;
+    margin-top: 4px;
+  }
+
+  .fix-btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.2s;
+    margin-bottom: 10px;
+  }
+  .fix-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 28px rgba(168,85,247,0.3);
+  }
+  .fix-btn:disabled {
+    background: var(--border);
+    color: var(--text-dim);
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .download-btn {
+    width: 100%;
+    padding: 14px;
+    background: transparent;
+    border: 2px solid var(--accent);
+    color: var(--accent);
+    border-radius: 10px;
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.2s;
+    display: none;
+  }
+  .download-btn.show { display: block; }
+  .download-btn:hover {
+    background: rgba(0,255,136,0.08);
+    transform: translateY(-1px);
+  }
+
+  .fix-note {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 8px;
+    line-height: 1.5;
+  }
+
+  .fix-loading { display: none; text-align: center; padding: 24px; }
+  .fix-loading.show { display: block; }
+  .fix-spinner {
+    width: 36px; height: 36px;
+    border: 3px solid var(--border);
+    border-top-color: #a855f7;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 12px;
+  }
+  .fix-loading-text {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+
+  .fix-success {
+    background: rgba(0,255,136,0.05);
+    border: 1px solid rgba(0,255,136,0.2);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 12px;
+    color: var(--accent);
+    margin-bottom: 10px;
+    display: none;
+    font-family: 'Space Mono', monospace;
+  }
+  .fix-success.show { display: block; }
+
   /* Model info */
   .model-info {
     text-align: center;
@@ -570,6 +700,33 @@
     </div>
     <div class="summary-box" id="summaryBox"></div>
     <div id="issueList"></div>
+
+    <!-- STEP 3: Auto Fix -->
+    <div class="fix-panel" id="fixPanel">
+      <div class="panel" style="margin-top:20px;">
+        <div class="panel-title">STEP 3 — HTMLファイルをアップロードして自動修正</div>
+        <div class="fix-upload-box" id="fixBox">
+          <input type="file" id="fixInput" accept=".html,.htm">
+          <div class="fix-upload-label">
+            <strong>HTML FILE</strong>
+            修正対象のHTMLファイルをタップまたはドロップ
+          </div>
+          <div class="fix-file-name" id="fixFileName"></div>
+        </div>
+        <button class="fix-btn" id="fixBtn" onclick="autoFix()">✨ AIが自動修正してダウンロード</button>
+        <div class="fix-loading" id="fixLoading">
+          <div class="fix-spinner"></div>
+          <div class="fix-loading-text">AIが修正を適用中...</div>
+        </div>
+        <div class="fix-success" id="fixSuccess">✅ 修正完了！ダウンロードボタンを押してください。</div>
+        <button class="download-btn" id="downloadBtn" onclick="downloadFixed()">⬇️ 修正済みHTMLをダウンロード</button>
+        <div class="fix-note">
+          ※ アップロードしたHTMLのCSSに、分析で検出した修正を自動適用します。<br>
+          ※ ファイルはブラウザ内のみで処理されます。サーバーに送信されません。
+        </div>
+      </div>
+    </div>
+
     <button class="reset-btn" onclick="resetAll()">↺ リセット</button>
   </div>
 
@@ -767,6 +924,9 @@ function showResults(data) {
 
   document.getElementById('summaryBox').textContent = data.summary || '';
 
+  // issuesを保存（auto fix用）
+  currentIssues = data.issues || [];
+
   const list = document.getElementById('issueList');
   list.innerHTML = '';
 
@@ -797,6 +957,10 @@ function showResults(data) {
 
   document.getElementById('results').classList.add('show');
   document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  // issuesがある場合のみSTEP3を表示
+  if (currentIssues.length > 0) {
+    document.getElementById('fixPanel').classList.add('show');
+  }
 }
 
 function escHtml(s) {
@@ -824,17 +988,160 @@ function showError(msg) {
 
 function resetAll() {
   designB64 = codedB64 = null;
+  fixedHtmlContent = null;
+  currentIssues = [];
   ['designPreview','codedPreview'].forEach(id => {
     const el = document.getElementById(id);
     el.style.display = 'none'; el.src = '';
   });
-  ['designName','codedName'].forEach(id => document.getElementById(id).textContent = '');
-  ['designInput','codedInput'].forEach(id => document.getElementById(id).value = '');
+  ['designName','codedName','fixFileName'].forEach(id => document.getElementById(id).textContent = '');
+  ['designInput','codedInput','fixInput'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('codeInput').value = '';
   document.getElementById('results').classList.remove('show');
   document.getElementById('errorBox').classList.remove('show');
   document.getElementById('warnBox').classList.remove('show');
+  document.getElementById('fixPanel').classList.remove('show');
+  document.getElementById('fixSuccess').classList.remove('show');
+  document.getElementById('downloadBtn').classList.remove('show');
   window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── Auto Fix ───────────────────────────────────────
+let fixedHtmlContent = null;
+let fixOriginalName  = 'fixed.html';
+let currentIssues    = [];
+
+// HTMLファイルアップロード設定
+(function setupFixUpload() {
+  const input  = document.getElementById('fixInput');
+  const nameEl = document.getElementById('fixFileName');
+  const box    = document.getElementById('fixBox');
+
+  const handle = file => {
+    if (!file) return;
+    fixOriginalName = file.name.replace(/\.html?$/i, '') + '_fixed.html';
+    nameEl.textContent = file.name;
+    document.getElementById('fixSuccess').classList.remove('show');
+    document.getElementById('downloadBtn').classList.remove('show');
+    fixedHtmlContent = null;
+  };
+
+  input.addEventListener('change', e => handle(e.target.files[0]));
+  box.addEventListener('dragover',  e => { e.preventDefault(); box.classList.add('dragover'); });
+  box.addEventListener('dragleave', () => box.classList.remove('dragover'));
+  box.addEventListener('drop', e => {
+    e.preventDefault();
+    box.classList.remove('dragover');
+    handle(e.dataTransfer.files[0]);
+  });
+})();
+
+async function autoFix() {
+  const groqKey = getGroqKey();
+  if (!groqKey) { showError('APIキーを設定してください。'); return; }
+
+  const fileInput = document.getElementById('fixInput');
+  if (!fileInput.files[0]) {
+    showError('HTMLファイルをアップロードしてください。');
+    return;
+  }
+  if (currentIssues.length === 0) {
+    showError('先に分析を実行してください。');
+    return;
+  }
+
+  // HTMLファイルを読み込む
+  const htmlText = await new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = e => res(e.target.result);
+    r.onerror = () => rej(new Error('ファイル読み込み失敗'));
+    r.readAsText(fileInput.files[0], 'utf-8');
+  });
+
+  // 修正内容をまとめてプロンプトに
+  const fixList = currentIssues
+    .filter(i => i.fix)
+    .map((i, idx) => `${idx + 1}. セレクタ「${i.selector}」→ ${i.fix}`)
+    .join('\n');
+
+  setFixLoading(true);
+  document.getElementById('fixSuccess').classList.remove('show');
+  document.getElementById('downloadBtn').classList.remove('show');
+
+  try {
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${groqKey}`
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        max_tokens: 8000,
+        temperature: 0.1,
+        messages: [{
+          role: 'user',
+          content: `以下のHTMLファイルのCSSに、指定された修正を適用してください。
+
+【修正指示】
+${fixList}
+
+【ルール】
+- 修正はHTMLファイル内の<style>タグ内のCSSに適用すること
+- <style>タグがない場合は</head>直前に<style>タグを追加して修正CSSを書くこと
+- 指定セレクタがすでに存在する場合は該当プロパティを上書き、存在しない場合は末尾に追加
+- HTMLの構造・テキスト・class名は一切変更しないこと
+- 完全なHTMLファイルをそのまま返すこと（\`\`\`などのマークダウンは不要）
+
+【HTMLファイル】
+${htmlText}`
+        }]
+      })
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error?.message || `HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    let result = data.choices?.[0]?.message?.content?.trim() || '';
+
+    // マークダウンコードブロックを除去
+    result = result.replace(/^```[\w]*\n?/gm, '').replace(/```$/gm, '').trim();
+
+    // HTMLとして妥当か簡易チェック
+    if (!result.includes('<') || !result.includes('>')) {
+      throw new Error('AIの返答がHTMLとして認識できませんでした。再試行してください。');
+    }
+
+    fixedHtmlContent = result;
+    document.getElementById('fixSuccess').classList.add('show');
+    document.getElementById('downloadBtn').classList.add('show');
+
+  } catch (err) {
+    showError(err.message || '修正中にエラーが発生しました。');
+  } finally {
+    setFixLoading(false);
+  }
+}
+
+function downloadFixed() {
+  if (!fixedHtmlContent) return;
+  const blob = new Blob([fixedHtmlContent], { type: 'text/html;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = fixOriginalName;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function setFixLoading(on) {
+  document.getElementById('fixLoading').classList.toggle('show', on);
+  document.getElementById('fixBtn').disabled = on;
 }
 
 // ── Init ───────────────────────────────────────────
