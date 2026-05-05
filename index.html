@@ -390,6 +390,7 @@
     padding: 6px 10px;
     background: rgba(255,255,255,0.02);
     border-bottom: 1px solid var(--border);
+    pointer-events: auto;
   }
 
   .file-type-badge {
@@ -406,13 +407,25 @@
 
   .file-name-input {
     flex: 1;
-    background: transparent;
-    border: none;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 5px;
     color: var(--text);
     font-family: 'Space Mono', monospace;
     font-size: 11px;
     outline: none;
     min-width: 0;
+    padding: 4px 8px;
+    cursor: text;
+    -webkit-user-select: text;
+    user-select: text;
+    pointer-events: auto;
+    position: relative;
+    z-index: 10;
+  }
+  .file-name-input:focus {
+    border-color: var(--accent);
+    background: var(--bg);
   }
   .file-name-input::placeholder { color: var(--text-dim); }
 
@@ -464,10 +477,13 @@
     font-size: 11px;
     padding: 12px;
     resize: vertical;
-    min-height: 110px;
+    min-height: 130px;
     line-height: 1.6;
     outline: none;
     display: block;
+    -webkit-user-select: text;
+    user-select: text;
+    pointer-events: auto;
   }
   .file-textarea.scss-mode { color: #cc6699; }
   .file-textarea.js-mode   { color: #ffd88a; }
@@ -867,13 +883,16 @@ function renderFileList(tab) {
          </select>`
       : '';
 
-    const subHeader = multi
-      ? `<div class="file-sub-header">
-           <input class="file-name-input" type="text" value="${escHtml(f.name)}" placeholder="${escHtml(fname)}" oninput="updateFileName('${t}',${id},this.value)">
+    // 常にファイル名入力欄を表示。複数の時のみ削除ボタンも表示
+    const subHeader = `<div class="file-sub-header">
+           <input class="file-name-input" type="text" value="${escHtml(f.name)}" placeholder="${escHtml(fname)}"
+             onclick="event.stopPropagation()"
+             onfocus="event.stopPropagation()"
+             onchange="updateFileName('${t}',${id},this.value)"
+             onblur="updateFileName('${t}',${id},this.value)">
            ${isCSS ? typeSelect : ''}
-           <button class="file-remove-btn" onclick="removeFile('${t}',${id})" title="削除">×</button>
-         </div>`
-      : (isCSS ? `<div style="padding:6px 12px 0;">${typeSelect}</div>` : '');
+           ${multi ? `<button class="file-remove-btn" onclick="removeFile('${t}',${id})" title="削除">×</button>` : ''}
+         </div>`;
 
     return `<div class="file-item" id="file-item-${id}">
       ${subHeader}
