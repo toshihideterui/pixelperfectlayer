@@ -611,11 +611,11 @@
       <span class="upload-icon">🎨</span>
       <div class="upload-sub">
         <strong>DESIGN IMAGE</strong>
-        複数画像タップまたはドロップ（最大5枚）
+        複数画像タップまたはドロップ（最大15枚）
       </div>
     </div>
     <div id="imagePreviewGrid" style="display:none;margin-top:10px;"></div>
-    <div style="font-size:10px;color:var(--text-dim);margin-top:7px;">※ Groq Vision上限: 1枚4MB以内・最大5枚まで</div>
+    <div style="font-size:10px;color:var(--text-dim);margin-top:7px;">※ Groq Vision上限: 1枚4MB以内・最大15枚まで</div>
   </div>
 
   <!-- STEP 2 -->
@@ -736,9 +736,9 @@ function switchTab(tab) { /* タブUI廃止 */ }
     const arr = Array.from(files).filter(f => f.type.startsWith('image/'));
     if (!arr.length) return;
 
-    const remaining = 5 - designImages.length;
+    const remaining = 15 - designImages.length;
     if (remaining <= 0) {
-      showError('画像は最大5枚までです。');
+      showError('画像は最大15枚までです。');
       return;
     }
     const toAdd = arr.slice(0, remaining);
@@ -747,7 +747,7 @@ function switchTab(tab) { /* タブUI廃止 */ }
       const r = new FileReader();
       r.onload = ev => {
         const b64 = ev.target.result.split(',')[1];
-        if (b64.length > 5 * 1024 * 1024) {
+        if (b64.length > 4 * 1024 * 1024) {
           showError(`${file.name} が4MBを超えています。スキップしました。`);
           return;
         }
@@ -758,7 +758,7 @@ function switchTab(tab) { /* タブUI廃止 */ }
     });
 
     if (arr.length > remaining) {
-      showError(`5枚制限のため ${arr.length - remaining} 枚スキップしました。`);
+      showError(`15枚制限のため ${arr.length - remaining} 枚スキップしました。`);
     }
   };
 
@@ -788,7 +788,7 @@ function renderPreviews() {
       </div>
     `).join('')
   }</div>
-  <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--accent);margin-top:6px;">${designImages.length}/5 枚</div>`;
+  <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--accent);margin-top:6px;">${designImages.length}/15 枚</div>`;
 }
 
 function removeImage(idx) {
