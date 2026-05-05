@@ -388,7 +388,7 @@
     transition: border-color 0.15s;
   }
   .file-item-header:hover { background: rgba(255,255,255,0.03); }
-  .file-item.open .file-item-header { border-bottom-color: var(--border); }
+  .file-item .file-item-header { border-bottom-color: var(--border); }
 
   .file-type-badge {
     font-family: 'Space Mono', monospace;
@@ -451,8 +451,7 @@
   }
   .file-remove-btn:hover { color: var(--red); }
 
-  .file-item-body { display: none; padding: 0; }
-  .file-item.open .file-item-body { display: block; }
+  .file-item-body { display: block; padding: 0; }
 
   .file-textarea {
     width: 100%;
@@ -806,10 +805,10 @@ function addFile(tab) {
   const defaultType = tab === 'css' ? 'css' : tab;
   files[tab].push({ id, name: '', code: '', type: defaultType });
   renderFileList(tab);
-  // 追加した項目を開く
+  // 追加したテキストエリアにフォーカス
   setTimeout(() => {
-    const item = document.getElementById('file-item-' + id);
-    if (item) { item.classList.add('open'); }
+    const ta = document.getElementById('file-ta-' + id);
+    if (ta) ta.focus();
   }, 50);
 }
 
@@ -856,12 +855,12 @@ function renderFileList(tab) {
   const list = document.getElementById(tab + 'FileList');
   if (!list) return;
   if (files[tab].length === 0) {
-    list.innerHTML = '<div style="font-size:11px;color:var(--text-dim);padding:8px 2px;">ファイルがありません。下のボタンで追加してください。</div>';
+    list.innerHTML = '<div style="font-size:11px;color:var(--text-dim);padding:8px 2px;">下のボタンでファイルを追加してください。</div>';
     return;
   }
   list.innerHTML = files[tab].map(f => {
     const typeOptions = tab === 'css'
-      ? '<option value="css">CSS</option><option value="scss">SCSS</option>'
+      ? `<option value="css"${f.type==='css'?' selected':''}>CSS</option><option value="scss"${f.type==='scss'?' selected':''}>SCSS</option>`
       : '';
     const typeSelect = tab === 'css'
       ? `<select class="file-type-select" onchange="updateFileType('${tab}',${f.id},this.value)">${typeOptions}</select>`
@@ -870,18 +869,23 @@ function renderFileList(tab) {
     const badgeClass = 'file-type-badge ' + (BADGE_CLASS[f.type] || '');
     const ph = PLACEHOLDER[f.type] || PLACEHOLDER[tab];
     const fname = f.name || (tab === 'html' ? 'index.html' : tab === 'css' ? 'style.css' : 'main.js');
+    // 複数ファイルの場合のみファイル名ヘッダーを表示
+    const showHeader = files[tab].length > 1;
+    const header = showHeader ? `
+      <div class="file-item-header">
+        <span class="${badgeClass}" id="file-badge-${f.id}">${f.type.toUpperCase()}</span>
+        <input class="file-name-input" type="text" value="${escHtml(f.name)}"
+          placeholder="${escHtml(fname)}"
+          oninput="updateFileName('${tab}',${f.id},this.value)">
+        ${typeSelect}
+        <button class="file-remove-btn" onclick="removeFile('${tab}',${f.id})" title="削除">×</button>
+      </div>` : (tab === 'css' ? `
+      <div style="padding:6px 10px 0;">
+        ${typeSelect}
+      </div>` : '');
     return `
-      <div class="file-item" id="file-item-${f.id}">
-        <div class="file-item-header" onclick="toggleFileItem(${f.id})">
-          <span class="${badgeClass}" id="file-badge-${f.id}">${f.type.toUpperCase()}</span>
-          <input class="file-name-input" type="text" value="${escHtml(f.name)}"
-            placeholder="${escHtml(fname)}"
-            onclick="event.stopPropagation()"
-            oninput="updateFileName('${tab}',${f.id},this.value)">
-          ${typeSelect}
-          <button class="file-toggle-btn" title="開閉">▾</button>
-          <button class="file-remove-btn" onclick="event.stopPropagation();removeFile('${tab}',${f.id})" title="削除">×</button>
-        </div>
+      <div class="file-item open" id="file-item-${f.id}">
+        ${header}
         <div class="file-item-body">
           <textarea id="file-ta-${f.id}" class="${taClass}"
             placeholder="${ph}"
