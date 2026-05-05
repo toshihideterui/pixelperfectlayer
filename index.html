@@ -536,6 +536,21 @@
   }
   .generate-note span { color: var(--accent); }
 
+  .file-pick-btn {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 12px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+  }
+  .file-pick-btn:hover { border-color: var(--accent); color: var(--accent); }
+
   /* 複数画像プレビュー */
   .image-preview-grid {
     display: grid;
@@ -607,12 +622,17 @@
   <div class="panel">
     <div class="panel-title">STEP 1 — デザインカンプ画像（任意・複数可・あると精度UP）</div>
     <div class="upload-box" id="designBox">
-      <input type="file" id="designInput" accept="image/*" multiple>
+      <input type="file" id="designInput" accept="image/*,image/png,image/jpeg,image/gif,image/webp,image/svg+xml" multiple>
       <span class="upload-icon">🎨</span>
       <div class="upload-sub">
         <strong>DESIGN IMAGE</strong>
         複数画像タップまたはドロップ（最大5枚）
       </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:8px;">
+      <button class="file-pick-btn" onclick="document.getElementById('designInput').click()">📁 ファイルから選ぶ</button>
+      <button class="file-pick-btn" onclick="document.getElementById('designInputCam').click()">📷 カメラで撮る</button>
+      <input type="file" id="designInputCam" accept="image/*" capture="environment" style="display:none" multiple>
     </div>
     <div id="imagePreviewGrid" style="display:none;margin-top:10px;"></div>
     <div style="font-size:10px;color:var(--text-dim);margin-top:7px;">※ Groq Vision上限: 1枚4MB以内・最大5枚まで</div>
@@ -763,6 +783,12 @@ function switchTab(tab) { /* タブUI廃止 */ }
   };
 
   input.addEventListener('change', e => { handleFiles(e.target.files); input.value = ''; });
+
+  // カメラ入力も同じhandleFilesで処理
+  const camInput = document.getElementById('designInputCam');
+  if (camInput) {
+    camInput.addEventListener('change', e => { handleFiles(e.target.files); camInput.value = ''; });
+  }
   box.addEventListener('dragover',  e => { e.preventDefault(); box.classList.add('dragover'); });
   box.addEventListener('dragleave', () => box.classList.remove('dragover'));
   box.addEventListener('drop', e => {
