@@ -20,6 +20,7 @@
     --text-dim: #6b6b80;
     --red: #ff4466;
     --yellow: #ffd700;
+    --purple: #a855f7;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -44,44 +45,37 @@
   }
 
   header {
-    position: relative;
-    z-index: 1;
-    padding: 20px 24px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    padding: 16px 20px;
     border-bottom: 1px solid var(--border);
     display: flex;
     align-items: center;
     justify-content: space-between;
     background: rgba(10,10,15,0.95);
     backdrop-filter: blur(12px);
-    position: sticky;
-    top: 0;
   }
 
-  .logo {
-    font-family: 'Space Mono', monospace;
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--accent);
-  }
+  .logo { font-family: 'Space Mono', monospace; font-size: 17px; font-weight: 700; color: var(--accent); }
   .logo span { color: var(--text-dim); }
 
   .badge {
-    background: linear-gradient(135deg, var(--accent2), #a855f7);
+    background: linear-gradient(135deg, var(--accent2), var(--purple));
     color: white;
     font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    padding: 3px 8px;
+    font-size: 9px;
+    padding: 3px 7px;
     border-radius: 4px;
     letter-spacing: 1px;
   }
 
-  /* Settings panel */
   .settings-toggle {
     background: transparent;
     border: 1px solid var(--border);
     color: var(--text-dim);
-    font-size: 18px;
-    width: 36px; height: 36px;
+    font-size: 17px;
+    width: 34px; height: 34px;
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s;
@@ -95,30 +89,25 @@
     z-index: 10;
     background: var(--surface);
     border-bottom: 1px solid var(--border);
-    padding: 20px 24px;
+    padding: 18px 20px;
   }
   .settings-panel.open { display: block; }
 
   .settings-title {
     font-family: 'Space Mono', monospace;
-    font-size: 11px;
+    font-size: 10px;
     color: var(--accent);
     letter-spacing: 2px;
     margin-bottom: 12px;
   }
 
-  .api-row {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    margin-bottom: 10px;
-  }
+  .api-row { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
 
   .api-label {
     font-family: 'Space Mono', monospace;
-    font-size: 11px;
+    font-size: 10px;
     color: var(--text-dim);
-    width: 80px;
+    width: 70px;
     flex-shrink: 0;
   }
 
@@ -129,8 +118,8 @@
     border-radius: 6px;
     color: var(--text);
     font-family: 'Space Mono', monospace;
-    font-size: 12px;
-    padding: 8px 12px;
+    font-size: 11px;
+    padding: 7px 10px;
     outline: none;
     transition: border-color 0.2s;
   }
@@ -141,8 +130,8 @@
     background: transparent;
     border: 1px solid var(--border);
     color: var(--text-dim);
-    font-size: 14px;
-    width: 32px; height: 32px;
+    font-size: 13px;
+    width: 30px; height: 30px;
     border-radius: 6px;
     cursor: pointer;
     flex-shrink: 0;
@@ -155,8 +144,8 @@
     border: none;
     color: var(--bg);
     font-family: 'Space Mono', monospace;
-    font-size: 12px;
-    padding: 8px 20px;
+    font-size: 11px;
+    padding: 7px 18px;
     border-radius: 6px;
     cursor: pointer;
     font-weight: 700;
@@ -165,35 +154,25 @@
   }
   .save-btn:hover { opacity: 0.85; }
 
-  /* Main */
   .main {
     position: relative;
     z-index: 1;
-    max-width: 900px;
+    max-width: 860px;
     margin: 0 auto;
-    padding: 32px 20px;
-  }
-
-  .section-title {
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    color: var(--accent);
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    margin-bottom: 10px;
+    padding: 28px 16px;
   }
 
   .panel {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 16px;
+    padding: 18px;
+    margin-bottom: 14px;
   }
 
   .panel-title {
     font-family: 'Space Mono', monospace;
-    font-size: 12px;
+    font-size: 11px;
     color: var(--text-dim);
     margin-bottom: 14px;
     display: flex;
@@ -206,20 +185,22 @@
     border-radius: 50%;
     background: var(--accent);
     box-shadow: 0 0 6px var(--accent);
-    display: inline-block;
+    flex-shrink: 0;
   }
 
-  .upload-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
+  .sub-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
   }
-  @media (max-width: 560px) { .upload-grid { grid-template-columns: 1fr; } }
 
   .upload-box {
     border: 2px dashed var(--border);
     border-radius: 10px;
-    padding: 28px 12px;
+    padding: 22px 12px;
     text-align: center;
     cursor: pointer;
     transition: all 0.2s;
@@ -236,33 +217,36 @@
     inset: 0;
     opacity: 0;
     cursor: pointer;
-    width: 100%;
-    height: 100%;
+    width: 100%; height: 100%;
   }
-  .upload-icon { font-size: 28px; margin-bottom: 6px; display: block; }
-  .upload-label { font-size: 12px; color: var(--text-dim); }
-  .upload-label strong {
+  .upload-icon { font-size: 24px; margin-bottom: 4px; display: block; }
+  .upload-sub { font-size: 11px; color: var(--text-dim); }
+  .upload-sub strong {
     color: var(--accent);
     font-family: 'Space Mono', monospace;
-    font-size: 11px;
+    font-size: 10px;
     display: block;
     margin-bottom: 2px;
   }
-  .preview-img {
-    max-width: 100%;
-    max-height: 100px;
-    object-fit: contain;
-    border-radius: 6px;
-    margin-top: 6px;
-    display: none;
-  }
-  .file-name {
+  .preview-img { max-width: 100%; max-height: 80px; object-fit: contain; border-radius: 6px; margin-top: 6px; display: none; }
+  .file-badge { font-family: 'Space Mono', monospace; font-size: 9px; color: var(--accent); margin-top: 4px; word-break: break-all; }
+
+  .tab-bar { display: flex; gap: 4px; margin-bottom: 10px; }
+  .tab-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
     font-family: 'Space Mono', monospace;
     font-size: 10px;
-    color: var(--accent);
-    margin-top: 4px;
-    word-break: break-all;
+    padding: 5px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
   }
+  .tab-btn.active { background: rgba(0,255,136,0.1); border-color: var(--accent); color: var(--accent); }
+
+  .code-pane { display: none; }
+  .code-pane.active { display: block; }
 
   .code-input {
     width: 100%;
@@ -272,15 +256,18 @@
     color: #a8e6cf;
     font-family: 'Space Mono', monospace;
     font-size: 11px;
-    padding: 14px;
+    padding: 12px;
     resize: vertical;
-    min-height: 120px;
+    min-height: 130px;
     line-height: 1.6;
     outline: none;
     transition: border-color 0.2s;
   }
+  .code-input.css-input { color: #c4b5fd; }
   .code-input:focus { border-color: var(--accent); }
   .code-input::placeholder { color: var(--text-dim); }
+
+  .code-hint { font-size: 10px; color: var(--text-dim); margin-top: 6px; line-height: 1.6; }
 
   .analyze-btn {
     width: 100%;
@@ -295,227 +282,60 @@
     cursor: pointer;
     letter-spacing: 1px;
     transition: all 0.2s;
+    margin-bottom: 6px;
   }
-  .analyze-btn:hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 8px 28px rgba(0,255,136,0.25);
-  }
-  .analyze-btn:disabled {
-    background: var(--border);
-    color: var(--text-dim);
-    cursor: not-allowed;
-  }
+  .analyze-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 8px 28px rgba(0,255,136,0.25); }
+  .analyze-btn:disabled { background: var(--border); color: var(--text-dim); cursor: not-allowed; transform: none; }
 
-  /* Warning */
-  .warn-box {
-    background: rgba(255,215,0,0.08);
-    border: 1px solid rgba(255,215,0,0.25);
-    border-radius: 8px;
-    padding: 12px 16px;
-    font-size: 12px;
-    color: var(--yellow);
-    margin-bottom: 16px;
-    display: none;
-  }
+  .model-info { text-align: center; font-family: 'Space Mono', monospace; font-size: 9px; color: var(--text-dim); margin-bottom: 14px; }
+  .model-info span { color: var(--accent); }
+
+  .warn-box { background: rgba(255,215,0,0.08); border: 1px solid rgba(255,215,0,0.25); border-radius: 8px; padding: 10px 14px; font-size: 11px; color: var(--yellow); margin-bottom: 12px; display: none; }
   .warn-box.show { display: block; }
 
-  /* Loading */
-  .loading { display: none; text-align: center; padding: 36px; }
+  .error-box { background: rgba(255,68,102,0.1); border: 1px solid rgba(255,68,102,0.3); border-radius: 8px; padding: 12px 16px; color: var(--red); font-size: 12px; margin-top: 12px; display: none; }
+  .error-box.show { display: block; }
+
+  .loading { display: none; text-align: center; padding: 32px; }
   .loading.show { display: block; }
-  .spinner {
-    width: 44px; height: 44px;
-    border: 3px solid var(--border);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    margin: 0 auto 14px;
-  }
+  .spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .loading-text {
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    color: var(--text-dim);
-    animation: pulse 1.5s ease-in-out infinite;
-  }
+  .loading-text { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--text-dim); animation: pulse 1.5s ease-in-out infinite; }
   @keyframes pulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
 
-  /* Results */
-  .results { display: none; }
+  .results { display: none; margin-top: 20px; }
   .results.show { display: block; }
 
-  .result-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
-  }
-  .result-title {
-    font-family: 'Space Mono', monospace;
-    font-size: 13px;
-    color: var(--accent);
-  }
-  .issue-count {
-    background: var(--red);
-    color: white;
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    padding: 3px 10px;
-    border-radius: 20px;
-  }
+  .result-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .result-title { font-family: 'Space Mono', monospace; font-size: 13px; color: var(--accent); }
+  .issue-count { background: var(--red); color: white; font-family: 'Space Mono', monospace; font-size: 10px; padding: 3px 10px; border-radius: 20px; }
   .issue-count.ok { background: var(--accent); color: var(--bg); }
 
-  .summary-box {
-    background: rgba(0,255,136,0.05);
-    border: 1px solid rgba(0,255,136,0.15);
-    border-radius: 8px;
-    padding: 16px 20px;
-    margin-bottom: 14px;
-    font-size: 13px;
-    line-height: 1.8;
-  }
+  .summary-box { background: rgba(0,255,136,0.05); border: 1px solid rgba(0,255,136,0.15); border-radius: 8px; padding: 14px 18px; margin-bottom: 12px; font-size: 13px; line-height: 1.8; }
 
-  .issue-card {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--red);
-    border-radius: 8px;
-    padding: 14px 18px;
-    margin-bottom: 10px;
-    animation: slideIn 0.3s ease both;
-  }
+  .issue-card { background: var(--surface2); border: 1px solid var(--border); border-left: 3px solid var(--red); border-radius: 8px; padding: 13px 16px; margin-bottom: 10px; animation: slideIn 0.3s ease both; }
   .issue-card.warning { border-left-color: var(--yellow); }
   .issue-card.ok-card { border-left-color: var(--accent); }
-  @keyframes slideIn {
-    from { opacity: 0; transform: translateY(6px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
+  @keyframes slideIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
-  .issue-selector {
-    font-family: 'Space Mono', monospace;
-    font-size: 12px;
-    color: #a8e6cf;
-    margin-bottom: 5px;
-  }
-  .severity-badge {
-    display: inline-block;
-    font-family: 'Space Mono', monospace;
-    font-size: 9px;
-    padding: 2px 6px;
-    border-radius: 3px;
-    margin-left: 8px;
-  }
+  .issue-selector { font-family: 'Space Mono', monospace; font-size: 11px; color: #a8e6cf; margin-bottom: 4px; }
+  .severity-badge { display: inline-block; font-family: 'Space Mono', monospace; font-size: 8px; padding: 2px 5px; border-radius: 3px; margin-left: 7px; vertical-align: middle; }
   .sev-high { background: rgba(255,68,102,0.2); color: var(--red); }
   .sev-med  { background: rgba(255,215,0,0.2);  color: var(--yellow); }
   .sev-low  { background: rgba(0,255,136,0.15); color: var(--accent); }
 
-  .issue-desc {
-    font-size: 12px;
-    color: var(--text-dim);
-    margin-bottom: 8px;
-    line-height: 1.5;
-  }
-  .issue-fix {
-    background: #0d0d14;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 10px 12px;
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    color: #ffd88a;
-    line-height: 1.6;
-    white-space: pre-wrap;
-    word-break: break-all;
-  }
-  .copy-btn {
-    margin-top: 6px;
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--text-dim);
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    padding: 4px 10px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
+  .issue-desc { font-size: 12px; color: var(--text-dim); margin-bottom: 8px; line-height: 1.5; }
+  .issue-fix { background: #0d0d14; border: 1px solid var(--border); border-radius: 6px; padding: 9px 12px; font-family: 'Space Mono', monospace; font-size: 10px; color: #ffd88a; line-height: 1.6; white-space: pre-wrap; word-break: break-all; }
+  .copy-btn { margin-top: 5px; background: transparent; border: 1px solid var(--border); color: var(--text-dim); font-family: 'Space Mono', monospace; font-size: 9px; padding: 3px 9px; border-radius: 4px; cursor: pointer; transition: all 0.15s; }
   .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
 
-  .error-box {
-    background: rgba(255,68,102,0.1);
-    border: 1px solid rgba(255,68,102,0.3);
-    border-radius: 8px;
-    padding: 14px 18px;
-    color: var(--red);
-    font-size: 12px;
-    margin-top: 14px;
-    display: none;
-  }
-  .error-box.show { display: block; }
-
-  .reset-btn {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--text-dim);
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    padding: 8px 16px;
-    border-radius: 6px;
-    cursor: pointer;
-    margin-top: 14px;
-    transition: all 0.15s;
-  }
-  .reset-btn:hover { border-color: var(--text-dim); color: var(--text); }
-
-  /* Auto Fix */
-  .fix-panel {
-    display: none;
-    margin-top: 20px;
-  }
+  .fix-panel { display: none; margin-top: 16px; }
   .fix-panel.show { display: block; }
-
-  .fix-upload-box {
-    border: 2px dashed var(--border);
-    border-radius: 10px;
-    padding: 24px 16px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s;
-    background: var(--surface2);
-    position: relative;
-    overflow: hidden;
-    margin-bottom: 12px;
-  }
-  .fix-upload-box:hover, .fix-upload-box.dragover {
-    border-color: #a855f7;
-    background: rgba(168,85,247,0.05);
-  }
-  .fix-upload-box input {
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    cursor: pointer;
-    width: 100%;
-    height: 100%;
-  }
-  .fix-upload-label { font-size: 12px; color: var(--text-dim); }
-  .fix-upload-label strong {
-    color: #a855f7;
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    display: block;
-    margin-bottom: 4px;
-  }
-  .fix-file-name {
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    color: #a855f7;
-    margin-top: 4px;
-  }
 
   .fix-btn {
     width: 100%;
     padding: 14px;
-    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    background: linear-gradient(135deg, #7c3aed, var(--purple));
     color: white;
     border: none;
     border-radius: 10px;
@@ -527,97 +347,36 @@
     transition: all 0.2s;
     margin-bottom: 10px;
   }
-  .fix-btn:hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 8px 28px rgba(168,85,247,0.3);
-  }
-  .fix-btn:disabled {
-    background: var(--border);
-    color: var(--text-dim);
-    cursor: not-allowed;
-    transform: none;
-  }
+  .fix-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 8px 28px rgba(168,85,247,0.3); }
+  .fix-btn:disabled { background: var(--border); color: var(--text-dim); cursor: not-allowed; transform: none; }
 
-  .download-btn {
-    width: 100%;
-    padding: 14px;
-    background: transparent;
-    border: 2px solid var(--accent);
-    color: var(--accent);
-    border-radius: 10px;
-    font-family: 'Space Mono', monospace;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    letter-spacing: 1px;
-    transition: all 0.2s;
-    display: none;
-  }
-  .download-btn.show { display: block; }
-  .download-btn:hover {
-    background: rgba(0,255,136,0.08);
-    transform: translateY(-1px);
-  }
-
-  .fix-note {
-    font-size: 11px;
-    color: var(--text-dim);
-    margin-top: 8px;
-    line-height: 1.5;
-  }
-
-  .fix-loading { display: none; text-align: center; padding: 24px; }
+  .fix-loading { display: none; text-align: center; padding: 20px; }
   .fix-loading.show { display: block; }
-  .fix-spinner {
-    width: 36px; height: 36px;
-    border: 3px solid var(--border);
-    border-top-color: #a855f7;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    margin: 0 auto 12px;
-  }
-  .fix-loading-text {
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    color: var(--text-dim);
-    animation: pulse 1.5s ease-in-out infinite;
-  }
+  .fix-spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--purple); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 10px; }
 
-  .fix-success {
-    background: rgba(0,255,136,0.05);
-    border: 1px solid rgba(0,255,136,0.2);
-    border-radius: 8px;
-    padding: 12px 16px;
-    font-size: 12px;
-    color: var(--accent);
-    margin-bottom: 10px;
-    display: none;
-    font-family: 'Space Mono', monospace;
-  }
+  .fix-success { background: rgba(0,255,136,0.05); border: 1px solid rgba(0,255,136,0.2); border-radius: 8px; padding: 10px 14px; font-size: 11px; color: var(--accent); margin-bottom: 10px; display: none; font-family: 'Space Mono', monospace; }
   .fix-success.show { display: block; }
 
-  /* Model info */
-  .model-info {
-    text-align: center;
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    color: var(--text-dim);
-    margin-top: 12px;
-  }
-  .model-info span { color: var(--accent); }
+  .download-btn { width: 100%; padding: 13px; background: transparent; border: 2px solid var(--accent); color: var(--accent); border-radius: 10px; font-family: 'Space Mono', monospace; font-size: 13px; font-weight: 700; cursor: pointer; letter-spacing: 1px; transition: all 0.2s; display: none; }
+  .download-btn.show { display: block; }
+  .download-btn:hover { background: rgba(0,255,136,0.08); transform: translateY(-1px); }
+
+  .reset-btn { background: transparent; border: 1px solid var(--border); color: var(--text-dim); font-family: 'Space Mono', monospace; font-size: 10px; padding: 7px 14px; border-radius: 6px; cursor: pointer; margin-top: 14px; transition: all 0.15s; }
+  .reset-btn:hover { border-color: var(--text-dim); color: var(--text); }
+
+  .fix-note { font-size: 10px; color: var(--text-dim); margin-top: 8px; line-height: 1.6; }
 </style>
 </head>
 <body>
 
 <header>
-  <div style="display:flex;align-items:center;gap:12px">
+  <div style="display:flex;align-items:center;gap:10px">
     <div class="logo">Pixel<span>Perfect</span> Layer</div>
-    <div class="badge">GROQ VISION</div>
+    <div class="badge">GROQ AI</div>
   </div>
-  <button class="settings-toggle" onclick="toggleSettings()" title="APIキー設定">⚙️</button>
+  <button class="settings-toggle" onclick="toggleSettings()">⚙️</button>
 </header>
 
-<!-- Settings -->
 <div class="settings-panel" id="settingsPanel">
   <div class="settings-title">// API KEY SETTINGS</div>
   <div class="api-row">
@@ -626,74 +385,65 @@
     <button class="toggle-btn" onclick="toggleVis('groqKeyInput')">👁</button>
   </div>
   <button class="save-btn" onclick="saveKeys()">保存</button>
-  <div style="font-size:11px;color:var(--text-dim);margin-top:10px;">
-    ※ キーはブラウザのlocalStorageに保存されます
-  </div>
+  <div style="font-size:10px;color:var(--text-dim);margin-top:8px;">※ localStorageに保存されます</div>
 </div>
 
 <div class="main">
 
-  <!-- Step 1 -->
+  <!-- STEP 1 -->
   <div class="panel">
-    <div class="panel-title">STEP 1 — 画像をアップロード</div>
-    <div class="upload-grid">
-      <div>
-        <div class="section-title">デザインカンプ（目標）</div>
-        <div class="upload-box" id="designBox">
-          <input type="file" id="designInput" accept="image/*">
-          <span class="upload-icon">🎨</span>
-          <div class="upload-label">
-            <strong>DESIGN IMAGE</strong>
-            タップまたはドロップ
-          </div>
-          <img id="designPreview" class="preview-img">
-          <div class="file-name" id="designName"></div>
-        </div>
+    <div class="panel-title">STEP 1 — デザインカンプ画像（任意・あると精度UP）</div>
+    <div class="upload-box" id="designBox">
+      <input type="file" id="designInput" accept="image/*">
+      <span class="upload-icon">🎨</span>
+      <div class="upload-sub">
+        <strong>DESIGN IMAGE</strong>
+        目標デザインの画像をタップまたはドロップ
       </div>
-      <div>
-        <div class="section-title">コーディング結果（現状）</div>
-        <div class="upload-box" id="codedBox">
-          <input type="file" id="codedInput" accept="image/*">
-          <span class="upload-icon">💻</span>
-          <div class="upload-label">
-            <strong>CODED PAGE</strong>
-            スクリーンショット
-          </div>
-          <img id="codedPreview" class="preview-img">
-          <div class="file-name" id="codedName"></div>
-        </div>
-      </div>
+      <img id="designPreview" class="preview-img">
+      <div class="file-badge" id="designName"></div>
     </div>
-    <div style="margin-top:10px;font-size:11px;color:var(--text-dim);">
-      ⚠️ Groq Vision: base64画像は1枚4MB以内。大きい画像は縮小してください。
-    </div>
+    <div style="font-size:10px;color:var(--text-dim);margin-top:7px;">※ Groq Vision上限: 4MB以内</div>
   </div>
 
-  <!-- Step 2 -->
+  <!-- STEP 2 -->
   <div class="panel">
-    <div class="panel-title">STEP 2 — HTML / CSS を貼り付け（任意・精度UP）</div>
-    <textarea class="code-input" id="codeInput" placeholder="<!-- HTMLやCSSをここに貼り付け（任意）-->
-例:
-.hero { margin-top: 40px; font-size: 16px; }
-.button { padding: 8px 16px; }"></textarea>
+    <div class="panel-title">STEP 2 — 現状のソースコードを貼り付け</div>
+
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('html')">HTML</button>
+      <button class="tab-btn" onclick="switchTab('css')">CSS</button>
+    </div>
+
+    <div class="code-pane active" id="pane-html">
+      <div class="sub-label">HTML</div>
+      <textarea class="code-input" id="htmlInput" placeholder="<!-- 現状のHTMLを貼り付け -->"></textarea>
+    </div>
+
+    <div class="code-pane" id="pane-css">
+      <div class="sub-label">CSS</div>
+      <textarea class="code-input css-input" id="cssInput" placeholder="/* 現状のCSSを貼り付け */"></textarea>
+    </div>
+
+    <div class="code-hint">
+      ※ HTMLとCSSを両方貼ると修正精度が上がります。<br>
+      ※ コードを貼ると、分析後に自動修正してダウンロードできます。
+    </div>
   </div>
 
   <div class="warn-box" id="warnBox"></div>
 
-  <button class="analyze-btn" id="analyzeBtn" onclick="analyze()">
-    🔍 AIでズレを分析する
-  </button>
-
-  <div class="model-info">Powered by <span>Groq</span> · meta-llama/llama-4-scout-17b-16e-instruct</div>
+  <button class="analyze-btn" id="analyzeBtn" onclick="analyze()">🔍 AIでズレを分析する</button>
+  <div class="model-info">Powered by <span>Groq</span> · Vision: llama-4-scout / Text: llama-3.3-70b</div>
 
   <div class="error-box" id="errorBox"></div>
 
   <div class="loading" id="loading">
     <div class="spinner"></div>
-    <div class="loading-text">Groq Vision が解析中...</div>
+    <div class="loading-text">Groq AI が解析中...</div>
   </div>
 
-  <div class="results" id="results" style="margin-top:24px;">
+  <div class="results" id="results">
     <div class="result-header">
       <div class="result-title">// 分析結果</div>
       <div class="issue-count" id="issueCount">0 issues</div>
@@ -701,28 +451,19 @@
     <div class="summary-box" id="summaryBox"></div>
     <div id="issueList"></div>
 
-    <!-- STEP 3: Auto Fix -->
     <div class="fix-panel" id="fixPanel">
-      <div class="panel" style="margin-top:20px;">
-        <div class="panel-title">STEP 3 — HTMLファイルをアップロードして自動修正</div>
-        <div class="fix-upload-box" id="fixBox">
-          <input type="file" id="fixInput" accept=".html,.htm">
-          <div class="fix-upload-label">
-            <strong>HTML FILE</strong>
-            修正対象のHTMLファイルをタップまたはドロップ
-          </div>
-          <div class="fix-file-name" id="fixFileName"></div>
-        </div>
-        <button class="fix-btn" id="fixBtn" onclick="autoFix()">✨ AIが自動修正してダウンロード</button>
+      <div class="panel">
+        <div class="panel-title">STEP 3 — 自動修正してダウンロード</div>
+        <button class="fix-btn" id="fixBtn" onclick="autoFix()">✨ コードに修正を適用してダウンロード</button>
         <div class="fix-loading" id="fixLoading">
           <div class="fix-spinner"></div>
-          <div class="fix-loading-text">AIが修正を適用中...</div>
+          <div class="loading-text">修正CSSを生成中...</div>
         </div>
-        <div class="fix-success" id="fixSuccess">✅ 修正完了！ダウンロードボタンを押してください。</div>
+        <div class="fix-success" id="fixSuccess">✅ 修正完了！ダウンロードしてください。</div>
         <button class="download-btn" id="downloadBtn" onclick="downloadFixed()">⬇️ 修正済みHTMLをダウンロード</button>
         <div class="fix-note">
-          ※ アップロードしたHTMLのCSSに、分析で検出した修正を自動適用します。<br>
-          ※ ファイルはブラウザ内のみで処理されます。サーバーに送信されません。
+          ※ STEP 2のHTMLにCSSの修正を適用してダウンロードします。<br>
+          ※ CSSも貼っている場合は一緒に埋め込まれます。
         </div>
       </div>
     </div>
@@ -733,153 +474,123 @@
 </div>
 
 <script>
-// ── State ──────────────────────────────────────────
 let designB64 = null, designType = 'image/png';
-let codedB64  = null, codedType  = 'image/png';
+let currentIssues = [], fixedHtmlContent = null;
 
-// ── LocalStorage ──────────────────────────────────
+// ── Settings ───────────────────────────────────────
 function loadKeys() {
-  const k = localStorage.getItem('ppl_groq_key') || '';
-  document.getElementById('groqKeyInput').value = k;
+  document.getElementById('groqKeyInput').value = localStorage.getItem('ppl_groq_key') || '';
 }
 function saveKeys() {
-  const k = document.getElementById('groqKeyInput').value.trim();
-  localStorage.setItem('ppl_groq_key', k);
+  localStorage.setItem('ppl_groq_key', document.getElementById('groqKeyInput').value.trim());
   alert('保存しました');
   document.getElementById('settingsPanel').classList.remove('open');
 }
 function getGroqKey() { return localStorage.getItem('ppl_groq_key') || ''; }
-
-function toggleSettings() {
-  document.getElementById('settingsPanel').classList.toggle('open');
-}
+function toggleSettings() { document.getElementById('settingsPanel').classList.toggle('open'); }
 function toggleVis(id) {
   const el = document.getElementById(id);
   el.type = el.type === 'password' ? 'text' : 'password';
 }
 
-// ── Upload ─────────────────────────────────────────
-function setupUpload(inputId, previewId, nameId, boxId, onLoad) {
-  const input   = document.getElementById(inputId);
-  const preview = document.getElementById(previewId);
-  const nameEl  = document.getElementById(nameId);
-  const box     = document.getElementById(boxId);
+// ── Tab ────────────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach((b, i) =>
+    b.classList.toggle('active', (i === 0) === (tab === 'html')));
+  document.getElementById('pane-html').classList.toggle('active', tab === 'html');
+  document.getElementById('pane-css').classList.toggle('active',  tab === 'css');
+}
+
+// ── Image upload ───────────────────────────────────
+(function() {
+  const input = document.getElementById('designInput');
+  const preview = document.getElementById('designPreview');
+  const nameEl  = document.getElementById('designName');
+  const box     = document.getElementById('designBox');
 
   const handle = file => {
     if (!file || !file.type.startsWith('image/')) return;
     nameEl.textContent = file.name;
-    const reader = new FileReader();
-    reader.onload = ev => {
-      const src = ev.target.result;
-      preview.src = src;
+    const r = new FileReader();
+    r.onload = ev => {
+      preview.src = ev.target.result;
       preview.style.display = 'block';
-      onLoad(src.split(',')[1], file.type);
+      designB64  = ev.target.result.split(',')[1];
+      designType = file.type;
     };
-    reader.readAsDataURL(file);
+    r.readAsDataURL(file);
   };
 
   input.addEventListener('change', e => handle(e.target.files[0]));
   box.addEventListener('dragover',  e => { e.preventDefault(); box.classList.add('dragover'); });
   box.addEventListener('dragleave', () => box.classList.remove('dragover'));
-  box.addEventListener('drop', e => {
-    e.preventDefault();
-    box.classList.remove('dragover');
-    handle(e.dataTransfer.files[0]);
-  });
-}
-
-setupUpload('designInput','designPreview','designName','designBox',
-  (b64, mime) => { designB64 = b64; designType = mime; });
-setupUpload('codedInput','codedPreview','codedName','codedBox',
-  (b64, mime) => { codedB64 = b64; codedType = mime; });
+  box.addEventListener('drop', e => { e.preventDefault(); box.classList.remove('dragover'); handle(e.dataTransfer.files[0]); });
+})();
 
 // ── Analyze ────────────────────────────────────────
 async function analyze() {
-  const groqKey = getGroqKey();
-  if (!groqKey) {
-    showError('⚙️ 右上の設定アイコンからGroq APIキーを入力してください。');
-    return;
-  }
-  if (!designB64 && !codedB64) {
-    showError('画像を最低1枚アップロードしてください。');
+  const groqKey  = getGroqKey();
+  if (!groqKey) { showError('⚙️ APIキーを設定してください。'); return; }
+
+  const htmlCode = document.getElementById('htmlInput').value.trim();
+  const cssCode  = document.getElementById('cssInput').value.trim();
+
+  if (!designB64 && !htmlCode && !cssCode) {
+    showError('デザイン画像またはソースコードを入力してください。');
     return;
   }
 
-  // Size warning (base64 > ~5MB string ≈ original > 3.7MB)
-  const checkSize = (b64, label) => {
-    if (b64 && b64.length > 5 * 1024 * 1024) {
-      document.getElementById('warnBox').textContent =
-        `⚠️ ${label}が大きすぎる可能性があります。Groqは4MB制限です。縮小してから再試行してください。`;
-      document.getElementById('warnBox').classList.add('show');
-      return true;
-    }
-    return false;
-  };
-  if (checkSize(designB64,'デザイン画像') || checkSize(codedB64,'コーディング画像')) return;
+  if (designB64 && designB64.length > 5 * 1024 * 1024) {
+    document.getElementById('warnBox').textContent = '⚠️ 画像が大きすぎます（Groq上限4MB）。縮小してください。';
+    document.getElementById('warnBox').classList.add('show');
+    return;
+  }
   document.getElementById('warnBox').classList.remove('show');
 
   setLoading(true);
   document.getElementById('errorBox').classList.remove('show');
   document.getElementById('results').classList.remove('show');
+  fixedHtmlContent = null;
 
-  // Build content array for Groq (OpenAI-compatible)
-  const userContent = [];
+  let codeSection = '';
+  if (htmlCode) codeSection += `\n\n【HTML】\n\`\`\`html\n${htmlCode}\n\`\`\``;
+  if (cssCode)  codeSection += `\n\n【CSS】\n\`\`\`css\n${cssCode}\n\`\`\``;
 
-  if (designB64) {
-    userContent.push({
-      type: 'image_url',
-      image_url: { url: `data:${designType};base64,${designB64}` }
-    });
-    userContent.push({ type: 'text', text: '【画像1: デザインカンプ（目標となるデザイン）】' });
-  }
-  if (codedB64) {
-    userContent.push({
-      type: 'image_url',
-      image_url: { url: `data:${codedType};base64,${codedB64}` }
-    });
-    userContent.push({ type: 'text', text: '【画像2: 実際のコーディング結果（スクリーンショット）】' });
-  }
+  const useVision = !!designB64;
+  const model = useVision ? 'meta-llama/llama-4-scout-17b-16e-instruct' : 'llama-3.3-70b-versatile';
 
-  const code = document.getElementById('codeInput').value.trim();
-  const codeSection = code
-    ? `\n\n現在のHTML/CSS:\n\`\`\`\n${code}\n\`\`\``
-    : '';
+  const prompt = `あなたはWebコーディング品質チェックの専門AIです。${codeSection}
 
-  userContent.push({
-    type: 'text',
-    text: `あなたはWebコーディング品質チェックの専門AIです。${codeSection}
-
-提供された画像を分析し、デザインカンプとコーディング結果のズレを検出して、以下のJSON形式のみで回答してください。マークダウンコードブロック(\`\`\`)は不要です。
+デザインカンプ${useVision ? '（画像）' : ''}と現状コードを比較・分析し、CSSのズレや改善点を検出してください。
+以下のJSON形式のみで返答してください（\`\`\`不要）。
 
 {
   "summary": "全体評価（日本語2〜3文）",
   "issueCount": 数値,
   "issues": [
     {
-      "selector": "CSSセレクタまたは要素名",
+      "selector": "CSSセレクタ",
       "severity": "high|medium|low",
-      "description": "ズレの説明（日本語）",
+      "description": "問題の説明（日本語）",
       "fix": "修正CSS（例: margin-top: 24px; font-size: 18px;）"
     }
   ]
 }
 
-画像が1枚の場合はその内容から潜在的な問題を指摘。issuesは最大8件。JSONのみ返答してください。`
-  });
+issuesは最大8件。コードがある場合は実際のセレクタ名を使うこと。JSONのみ返答。`;
+
+  const userContent = useVision
+    ? [
+        { type: 'image_url', image_url: { url: `data:${designType};base64,${designB64}` } },
+        { type: 'text', text: '【画像: デザインカンプ】\n' + prompt }
+      ]
+    : prompt;
 
   try {
     const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${groqKey}`
-      },
-      body: JSON.stringify({
-        model: 'meta-llama/llama-4-scout-17b-16e-instruct',
-        max_tokens: 1200,
-        temperature: 0.3,
-        messages: [{ role: 'user', content: userContent }]
-      })
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${groqKey}` },
+      body: JSON.stringify({ model, max_tokens: 1200, temperature: 0.3, messages: [{ role: 'user', content: userContent }] })
     });
 
     if (!res.ok) {
@@ -889,176 +600,69 @@ async function analyze() {
 
     const data = await res.json();
     const text = data.choices?.[0]?.message?.content?.trim() || '';
-
     let parsed;
-    try {
-      const clean = text.replace(/```json|```/g, '').trim();
-      parsed = JSON.parse(clean);
-    } catch {
-      // fallback: show raw text
-      parsed = {
-        summary: text,
-        issueCount: 0,
-        issues: []
-      };
-    }
-
+    try { parsed = JSON.parse(text.replace(/```json|```/g, '').trim()); }
+    catch { parsed = { summary: text, issueCount: 0, issues: [] }; }
     showResults(parsed);
 
-  } catch (err) {
+  } catch(err) {
     showError(err.message || '分析中にエラーが発生しました。');
   } finally {
     setLoading(false);
   }
 }
 
-// ── Render Results ─────────────────────────────────
+// ── Show Results ───────────────────────────────────
 function showResults(data) {
-  const count = typeof data.issueCount === 'number'
-    ? data.issueCount
-    : (data.issues?.length || 0);
+  currentIssues = data.issues || [];
+  const count = typeof data.issueCount === 'number' ? data.issueCount : currentIssues.length;
 
   const countEl = document.getElementById('issueCount');
   countEl.textContent = `${count} issues`;
-  countEl.className = 'issue-count' + (count === 0 ? ' ok' : '');
-
+  countEl.className   = 'issue-count' + (count === 0 ? ' ok' : '');
   document.getElementById('summaryBox').textContent = data.summary || '';
-
-  // issuesを保存（auto fix用）
-  currentIssues = data.issues || [];
 
   const list = document.getElementById('issueList');
   list.innerHTML = '';
 
-  const issues = data.issues || [];
-  if (issues.length === 0) {
+  if (currentIssues.length === 0) {
     list.innerHTML = '<div class="issue-card ok-card"><div class="issue-selector">✅ 問題なし</div><div class="issue-desc">大きなズレは検出されませんでした。</div></div>';
   } else {
-    issues.forEach((issue, i) => {
-      const card = document.createElement('div');
+    currentIssues.forEach((issue, i) => {
       const sev = issue.severity || 'medium';
-      card.className = 'issue-card' +
-        (sev === 'high' ? '' : sev === 'medium' ? ' warning' : ' ok-card');
-      card.style.animationDelay = `${i * 0.05}s`;
       const sevClass = sev === 'high' ? 'sev-high' : sev === 'medium' ? 'sev-med' : 'sev-low';
       const sevLabel = sev === 'high' ? 'HIGH' : sev === 'medium' ? 'MED' : 'LOW';
-      const fixHtml = issue.fix
-        ? `<div class="issue-fix">${escHtml(issue.fix)}</div>
-           <button class="copy-btn" onclick="copyText(this,\`${issue.fix.replace(/`/g,"'")}\`)">📋 コピー</button>`
-        : '';
+      const cardClass = sev === 'high' ? '' : sev === 'medium' ? ' warning' : ' ok-card';
+      const card = document.createElement('div');
+      card.className = `issue-card${cardClass}`;
+      card.style.animationDelay = `${i * 0.05}s`;
       card.innerHTML = `
         <div class="issue-selector">${escHtml(issue.selector||'要素不明')}<span class="severity-badge ${sevClass}">${sevLabel}</span></div>
         <div class="issue-desc">${escHtml(issue.description||'')}</div>
-        ${fixHtml}
+        ${issue.fix ? `<div class="issue-fix">${escHtml(issue.fix)}</div><button class="copy-btn" onclick="copyText(this,\`${issue.fix.replace(/`/g,"'")}\`)">📋 コピー</button>` : ''}
       `;
       list.appendChild(card);
     });
   }
 
   document.getElementById('results').classList.add('show');
+
+  // HTMLが貼られていてissuesがある場合のみSTEP3を表示
+  const hasHtml = document.getElementById('htmlInput').value.trim();
+  document.getElementById('fixPanel').classList.toggle('show', currentIssues.length > 0 && !!hasHtml);
+
   document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  // issuesがある場合のみSTEP3を表示
-  if (currentIssues.length > 0) {
-    document.getElementById('fixPanel').classList.add('show');
-  }
-}
-
-function escHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-function copyText(btn, text) {
-  navigator.clipboard.writeText(text).then(() => {
-    btn.textContent = '✅ コピー完了';
-    setTimeout(() => { btn.textContent = '📋 コピー'; }, 1500);
-  });
-}
-
-// ── Helpers ────────────────────────────────────────
-function setLoading(on) {
-  document.getElementById('loading').classList.toggle('show', on);
-  document.getElementById('analyzeBtn').disabled = on;
-}
-
-function showError(msg) {
-  const el = document.getElementById('errorBox');
-  el.textContent = '⚠️ ' + msg;
-  el.classList.add('show');
-}
-
-function resetAll() {
-  designB64 = codedB64 = null;
-  fixedHtmlContent = null;
-  currentIssues = [];
-  ['designPreview','codedPreview'].forEach(id => {
-    const el = document.getElementById(id);
-    el.style.display = 'none'; el.src = '';
-  });
-  ['designName','codedName','fixFileName'].forEach(id => document.getElementById(id).textContent = '');
-  ['designInput','codedInput','fixInput'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('codeInput').value = '';
-  document.getElementById('results').classList.remove('show');
-  document.getElementById('errorBox').classList.remove('show');
-  document.getElementById('warnBox').classList.remove('show');
-  document.getElementById('fixPanel').classList.remove('show');
-  document.getElementById('fixSuccess').classList.remove('show');
-  document.getElementById('downloadBtn').classList.remove('show');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // ── Auto Fix ───────────────────────────────────────
-let fixedHtmlContent = null;
-let fixOriginalName  = 'fixed.html';
-let currentIssues    = [];
-
-// HTMLファイルアップロード設定
-(function setupFixUpload() {
-  const input  = document.getElementById('fixInput');
-  const nameEl = document.getElementById('fixFileName');
-  const box    = document.getElementById('fixBox');
-
-  const handle = file => {
-    if (!file) return;
-    fixOriginalName = file.name.replace(/\.html?$/i, '') + '_fixed.html';
-    nameEl.textContent = file.name;
-    document.getElementById('fixSuccess').classList.remove('show');
-    document.getElementById('downloadBtn').classList.remove('show');
-    fixedHtmlContent = null;
-  };
-
-  input.addEventListener('change', e => handle(e.target.files[0]));
-  box.addEventListener('dragover',  e => { e.preventDefault(); box.classList.add('dragover'); });
-  box.addEventListener('dragleave', () => box.classList.remove('dragover'));
-  box.addEventListener('drop', e => {
-    e.preventDefault();
-    box.classList.remove('dragover');
-    handle(e.dataTransfer.files[0]);
-  });
-})();
-
 async function autoFix() {
   const groqKey = getGroqKey();
   if (!groqKey) { showError('APIキーを設定してください。'); return; }
 
-  const fileInput = document.getElementById('fixInput');
-  if (!fileInput.files[0]) {
-    showError('HTMLファイルをアップロードしてください。');
-    return;
-  }
-  if (currentIssues.length === 0) {
-    showError('先に分析を実行してください。');
-    return;
-  }
+  const htmlCode = document.getElementById('htmlInput').value.trim();
+  const cssCode  = document.getElementById('cssInput').value.trim();
+  if (!htmlCode) { showError('STEP 2 にHTMLコードを貼り付けてください。'); return; }
 
-  // HTMLファイルを読み込む
-  const htmlText = await new Promise((res, rej) => {
-    const r = new FileReader();
-    r.onload = e => res(e.target.result);
-    r.onerror = () => rej(new Error('ファイル読み込み失敗'));
-    r.readAsText(fileInput.files[0], 'utf-8');
-  });
-
-  // 修正内容リスト
   const fixList = currentIssues
     .filter(i => i.fix)
     .map((i, idx) => `${idx + 1}. ${i.selector} { ${i.fix} }`)
@@ -1069,24 +673,16 @@ async function autoFix() {
   document.getElementById('downloadBtn').classList.remove('show');
 
   try {
-    // ── Step1: 修正CSSブロックだけをAIに生成させる（HTMLは送らない）──
     const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${groqKey}`
-      },
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${groqKey}` },
       body: JSON.stringify({
         model: 'llama-3.3-70b-versatile',
-        max_tokens: 1000,
+        max_tokens: 800,
         temperature: 0.1,
         messages: [{
           role: 'user',
-          content: `以下の修正指示をCSSルールとしてまとめてください。
-同じセレクタは1つにまとめ、CSSコードのみ返してください（\`\`\`不要）。
-
-【修正指示】
-${fixList}`
+          content: `以下の修正指示をCSSルールにまとめてください。同じセレクタは1つにまとめ、CSSコードのみ返してください（\`\`\`不要）。\n\n${fixList}`
         }]
       })
     });
@@ -1100,26 +696,33 @@ ${fixList}`
     let cssBlock = data.choices?.[0]?.message?.content?.trim() || '';
     cssBlock = cssBlock.replace(/```[\w]*\n?/g, '').replace(/```/g, '').trim();
 
-    // ── Step2: HTMLファイルへのCSS注入はブラウザ側で実行（API不使用）──
-    const injectedCSS = `\n/* PixelPerfect Layer - AI修正 ${new Date().toLocaleDateString('ja-JP')} */\n${cssBlock}\n`;
+    const date = new Date().toLocaleDateString('ja-JP');
+    const injection = `\n/* PixelPerfect Layer - AI修正 ${date} */\n${cssBlock}\n`;
 
-    let result;
-    if (htmlText.includes('</style>')) {
-      // 既存の</style>の直前に挿入
-      result = htmlText.replace(/<\/style>(\s*<\/style>)*/, `${injectedCSS}</style>`);
-    } else if (htmlText.includes('</head>')) {
-      // <style>タグごと</head>直前に挿入
-      result = htmlText.replace('</head>', `<style>${injectedCSS}</style>\n</head>`);
-    } else {
-      // どちらもない場合は先頭に追加
-      result = `<style>${injectedCSS}</style>\n` + htmlText;
+    // HTMLとCSSを結合
+    let combined = htmlCode;
+    if (cssCode && !combined.includes('<style')) {
+      combined = combined.includes('</head>')
+        ? combined.replace('</head>', `<style>\n${cssCode}\n</style>\n</head>`)
+        : `<style>\n${cssCode}\n</style>\n` + combined;
     }
 
-    fixedHtmlContent = result;
+    // 修正CSS注入
+    if (combined.includes('</style>')) {
+      // 最後の</style>の直前に挿入
+      const lastIdx = combined.lastIndexOf('</style>');
+      combined = combined.slice(0, lastIdx) + injection + combined.slice(lastIdx);
+    } else if (combined.includes('</head>')) {
+      combined = combined.replace('</head>', `<style>${injection}</style>\n</head>`);
+    } else {
+      combined = `<style>${injection}</style>\n` + combined;
+    }
+
+    fixedHtmlContent = combined;
     document.getElementById('fixSuccess').classList.add('show');
     document.getElementById('downloadBtn').classList.add('show');
 
-  } catch (err) {
+  } catch(err) {
     showError(err.message || '修正中にエラーが発生しました。');
   } finally {
     setFixLoading(false);
@@ -1131,20 +734,50 @@ function downloadFixed() {
   const blob = new Blob([fixedHtmlContent], { type: 'text/html;charset=utf-8' });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
-  a.href     = url;
-  a.download = fixOriginalName;
-  document.body.appendChild(a);
-  a.click();
+  a.href = url; a.download = 'fixed.html';
+  document.body.appendChild(a); a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
 
+// ── Helpers ────────────────────────────────────────
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function copyText(btn, text) {
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✅ コピー完了';
+    setTimeout(() => { btn.textContent = '📋 コピー'; }, 1500);
+  });
+}
+function setLoading(on) {
+  document.getElementById('loading').classList.toggle('show', on);
+  document.getElementById('analyzeBtn').disabled = on;
+}
 function setFixLoading(on) {
   document.getElementById('fixLoading').classList.toggle('show', on);
   document.getElementById('fixBtn').disabled = on;
 }
+function showError(msg) {
+  const el = document.getElementById('errorBox');
+  el.textContent = '⚠️ ' + msg;
+  el.classList.add('show');
+}
+function resetAll() {
+  designB64 = null; currentIssues = []; fixedHtmlContent = null;
+  const prev = document.getElementById('designPreview');
+  prev.style.display = 'none'; prev.src = '';
+  document.getElementById('designName').textContent = '';
+  document.getElementById('designInput').value = '';
+  document.getElementById('htmlInput').value = '';
+  document.getElementById('cssInput').value  = '';
+  ['results','errorBox','warnBox','fixPanel','fixSuccess'].forEach(id =>
+    document.getElementById(id).classList.remove('show'));
+  document.getElementById('downloadBtn').classList.remove('show');
+  switchTab('html');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
-// ── Init ───────────────────────────────────────────
 loadKeys();
 </script>
 </body>
