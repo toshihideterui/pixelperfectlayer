@@ -1058,10 +1058,10 @@ async function autoFix() {
     r.readAsText(fileInput.files[0], 'utf-8');
   });
 
-  // 修正内容をまとめてプロンプトに
+  // 修正内容リスト
   const fixList = currentIssues
     .filter(i => i.fix)
-    .map((i, idx) => `${idx + 1}. セレクタ「${i.selector}」→ ${i.fix}`)
+    .map((i, idx) => `${idx + 1}. ${i.selector} { ${i.fix} }`)
     .join('\n');
 
   setFixLoading(true);
@@ -1069,6 +1069,7 @@ async function autoFix() {
   document.getElementById('downloadBtn').classList.remove('show');
 
   try {
+    // ── Step1: 修正CSSブロックだけをAIに生成させる（HTMLは送らない）──
     const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -1077,24 +1078,15 @@ async function autoFix() {
       },
       body: JSON.stringify({
         model: 'llama-3.3-70b-versatile',
-        max_tokens: 8000,
+        max_tokens: 1000,
         temperature: 0.1,
         messages: [{
           role: 'user',
-          content: `以下のHTMLファイルのCSSに、指定された修正を適用してください。
+          content: `以下の修正指示をCSSルールとしてまとめてください。
+同じセレクタは1つにまとめ、CSSコードのみ返してください（\`\`\`不要）。
 
 【修正指示】
-${fixList}
-
-【ルール】
-- 修正はHTMLファイル内の<style>タグ内のCSSに適用すること
-- <style>タグがない場合は</head>直前に<style>タグを追加して修正CSSを書くこと
-- 指定セレクタがすでに存在する場合は該当プロパティを上書き、存在しない場合は末尾に追加
-- HTMLの構造・テキスト・class名は一切変更しないこと
-- 完全なHTMLファイルをそのまま返すこと（\`\`\`などのマークダウンは不要）
-
-【HTMLファイル】
-${htmlText}`
+${fixList}`
         }]
       })
     });
@@ -1105,14 +1097,22 @@ ${htmlText}`
     }
 
     const data = await res.json();
-    let result = data.choices?.[0]?.message?.content?.trim() || '';
+    let cssBlock = data.choices?.[0]?.message?.content?.trim() || '';
+    cssBlock = cssBlock.replace(/```[\w]*\n?/g, '').replace(/```/g, '').trim();
 
-    // マークダウンコードブロックを除去
-    result = result.replace(/^```[\w]*\n?/gm, '').replace(/```$/gm, '').trim();
+    // ── Step2: HTMLファイルへのCSS注入はブラウザ側で実行（API不使用）──
+    const injectedCSS = `\n/* PixelPerfect Layer - AI修正 ${new Date().toLocaleDateString('ja-JP')} */\n${cssBlock}\n`;
 
-    // HTMLとして妥当か簡易チェック
-    if (!result.includes('<') || !result.includes('>')) {
-      throw new Error('AIの返答がHTMLとして認識できませんでした。再試行してください。');
+    let result;
+    if (htmlText.includes('</style>')) {
+      // 既存の</style>の直前に挿入
+      result = htmlText.replace(/<\/style>(\s*<\/style>)*/, `${injectedCSS}</style>`);
+    } else if (htmlText.includes('</head>')) {
+      // <style>タグごと</head>直前に挿入
+      result = htmlText.replace('</head>', `<style>${injectedCSS}</style>\n</head>`);
+    } else {
+      // どちらもない場合は先頭に追加
+      result = `<style>${injectedCSS}</style>\n` + htmlText;
     }
 
     fixedHtmlContent = result;
