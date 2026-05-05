@@ -231,22 +231,29 @@
   .preview-img { max-width: 100%; max-height: 80px; object-fit: contain; border-radius: 6px; margin-top: 6px; display: none; }
   .file-badge { font-family: 'Space Mono', monospace; font-size: 9px; color: var(--accent); margin-top: 4px; word-break: break-all; }
 
-  .tab-bar { display: flex; gap: 4px; margin-bottom: 10px; }
-  .tab-btn {
-    background: transparent;
+  /* STEP2 セクション */
+  .code-section {
+    margin-bottom: 14px;
     border: 1px solid var(--border);
-    color: var(--text-dim);
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--surface2);
+  }
+
+  .code-section-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.02);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .code-section-label {
     font-family: 'Space Mono', monospace;
     font-size: 10px;
-    padding: 5px 14px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.15s;
+    color: var(--text-dim);
   }
-  .tab-btn.active { background: rgba(0,255,136,0.1); border-color: var(--accent); color: var(--accent); }
-
-  .code-pane { display: none; }
-  .code-pane.active { display: block; }
 
   .code-input {
     width: 100%;
@@ -370,25 +377,20 @@
   .file-list { margin-bottom: 8px; }
 
   .file-item {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
     margin-bottom: 8px;
+    border-radius: 6px;
     overflow: hidden;
+    border: 1px solid var(--border);
   }
 
-  .file-item-header {
+  .file-sub-header {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 8px 10px;
-    cursor: pointer;
-    user-select: none;
-    border-bottom: 1px solid transparent;
-    transition: border-color 0.15s;
+    padding: 6px 10px;
+    background: rgba(255,255,255,0.02);
+    border-bottom: 1px solid var(--border);
   }
-  .file-item-header:hover { background: rgba(255,255,255,0.03); }
-  .file-item .file-item-header { border-bottom-color: var(--border); }
 
   .file-type-badge {
     font-family: 'Space Mono', monospace;
@@ -604,35 +606,35 @@
   <div class="panel">
     <div class="panel-title">STEP 2 — 現状のソースコードを貼り付け（複数ファイル可）</div>
 
-    <div class="tab-bar">
-      <button class="tab-btn active" onclick="switchTab('html')">HTML</button>
-      <button class="tab-btn" onclick="switchTab('css')">CSS / SCSS</button>
-      <button class="tab-btn" onclick="switchTab('js')">JavaScript</button>
+    <div class="code-section">
+      <div class="code-section-header">
+        <span class="file-type-badge badge-html">HTML</span>
+        <span class="code-section-label">HTMLファイル</span>
+      </div>
+      <div id="htmlFileList" class="file-list"></div>
+      <button class="add-file-btn" onclick="addFile('html')">＋ HTMLを追加</button>
     </div>
 
-    <div class="code-pane active" id="pane-html">
-      <div class="file-list" id="htmlFileList"></div>
-      <div class="add-file-row">
-        <button class="add-file-btn" onclick="addFile('html')">＋ HTMLファイルを追加</button>
+    <div class="code-section">
+      <div class="code-section-header">
+        <span class="file-type-badge badge-css">CSS/SCSS</span>
+        <span class="code-section-label">CSS / SCSSファイル</span>
       </div>
+      <div id="cssFileList" class="file-list"></div>
+      <button class="add-file-btn" onclick="addFile('css')">＋ CSS/SCSSを追加</button>
     </div>
 
-    <div class="code-pane" id="pane-css">
-      <div class="file-list" id="cssFileList"></div>
-      <div class="add-file-row">
-        <button class="add-file-btn" onclick="addFile('css')">＋ CSS / SCSSファイルを追加</button>
+    <div class="code-section">
+      <div class="code-section-header">
+        <span class="file-type-badge badge-js">JS</span>
+        <span class="code-section-label">JavaScriptファイル</span>
       </div>
-    </div>
-
-    <div class="code-pane" id="pane-js">
-      <div class="file-list" id="jsFileList"></div>
-      <div class="add-file-row">
-        <button class="add-file-btn" onclick="addFile('js')">＋ JavaScriptファイルを追加</button>
-      </div>
+      <div id="jsFileList" class="file-list"></div>
+      <button class="add-file-btn" onclick="addFile('js')">＋ JavaScriptを追加</button>
     </div>
 
     <div class="code-hint">
-      ※ 各タブに複数ファイルを追加できます（HTML / CSS・SCSS / JS）。<br>
+      ※ 各セクションに複数ファイルを追加できます。<br>
       ※ HTMLを貼ると、分析後に修正済みファイルをダウンロードできます。
     </div>
   </div>
@@ -706,14 +708,8 @@ function toggleVis(id) {
   el.type = el.type === 'password' ? 'text' : 'password';
 }
 
-// ── Tab ────────────────────────────────────────────
-const TABS = ['html','css','js'];
-function switchTab(tab) {
-  document.querySelectorAll('.tab-btn').forEach((b, i) =>
-    b.classList.toggle('active', TABS[i] === tab));
-  TABS.forEach(t =>
-    document.getElementById('pane-' + t).classList.toggle('active', t === tab));
-}
+// ── Tab (廃止・後方互換のみ) ─────────────────────────
+function switchTab(tab) { /* タブUI廃止 */ }
 
 let designImages = []; // [{b64, type, name}]
 
@@ -855,43 +851,35 @@ function renderFileList(tab) {
   const list = document.getElementById(tab + 'FileList');
   if (!list) return;
   if (files[tab].length === 0) {
-    list.innerHTML = '<div style="font-size:11px;color:var(--text-dim);padding:8px 2px;">下のボタンでファイルを追加してください。</div>';
+    list.innerHTML = '';
     return;
   }
+  const multi = files[tab].length > 1;
   list.innerHTML = files[tab].map(f => {
-    const typeOptions = tab === 'css'
-      ? `<option value="css"${f.type==='css'?' selected':''}>CSS</option><option value="scss"${f.type==='scss'?' selected':''}>SCSS</option>`
+    const isCSS = tab === 'css';
+    const typeOptions = isCSS
+      ? '<option value="css"' + (f.type==='css'?' selected':'') + '>CSS</option><option value="scss"' + (f.type==='scss'?' selected':'') + '>SCSS</option>'
       : '';
-    const typeSelect = tab === 'css'
-      ? `<select class="file-type-select" onchange="updateFileType('${tab}',${f.id},this.value)">${typeOptions}</select>`
+    const typeSelect = isCSS
+      ? '<select class="file-type-select" onchange="updateFileType('' + tab + '',' + f.id + ',this.value)">' + typeOptions + '</select>'
       : '';
     const taClass = 'file-textarea' + (COLOR_CLASS[f.type] ? ' ' + COLOR_CLASS[f.type] : '');
-    const badgeClass = 'file-type-badge ' + (BADGE_CLASS[f.type] || '');
     const ph = PLACEHOLDER[f.type] || PLACEHOLDER[tab];
     const fname = f.name || (tab === 'html' ? 'index.html' : tab === 'css' ? 'style.css' : 'main.js');
-    // 複数ファイルの場合のみファイル名ヘッダーを表示
-    const showHeader = files[tab].length > 1;
-    const header = showHeader ? `
-      <div class="file-item-header">
-        <span class="${badgeClass}" id="file-badge-${f.id}">${f.type.toUpperCase()}</span>
-        <input class="file-name-input" type="text" value="${escHtml(f.name)}"
-          placeholder="${escHtml(fname)}"
-          oninput="updateFileName('${tab}',${f.id},this.value)">
-        ${typeSelect}
-        <button class="file-remove-btn" onclick="removeFile('${tab}',${f.id})" title="削除">×</button>
-      </div>` : (tab === 'css' ? `
-      <div style="padding:6px 10px 0;">
-        ${typeSelect}
-      </div>` : '');
-    return `
-      <div class="file-item open" id="file-item-${f.id}">
-        ${header}
-        <div class="file-item-body">
-          <textarea id="file-ta-${f.id}" class="${taClass}"
-            placeholder="${ph}"
-            oninput="updateFileCode('${tab}',${f.id},this.value)">${escHtml(f.code)}</textarea>
-        </div>
-      </div>`;
+
+    // ファイルが複数の時だけ名前・削除ボタンを表示
+    const subHeader = multi
+      ? '<div class="file-sub-header">'
+        + '<input class="file-name-input" type="text" value="' + escHtml(f.name) + '" placeholder="' + escHtml(fname) + '" oninput="updateFileName('' + tab + '',' + f.id + ',this.value)">'
+        + (isCSS ? typeSelect : '')
+        + '<button class="file-remove-btn" onclick="removeFile('' + tab + '',' + f.id + ')" title="削除">×</button>'
+        + '</div>'
+      : (isCSS ? '<div style="padding:6px 12px 0;">' + typeSelect + '</div>' : '');
+
+    return '<div class="file-item" id="file-item-' + f.id + '">'
+      + subHeader
+      + '<textarea id="file-ta-' + f.id + '" class="' + taClass + '" placeholder="' + ph + '" oninput="updateFileCode('' + tab + '',' + f.id + ',this.value)">' + escHtml(f.code) + '</textarea>'
+      + '</div>';
   }).join('');
 }
 
@@ -1298,7 +1286,6 @@ function resetAll() {
   ['results','errorBox','warnBox','fixPanel','fixSuccess'].forEach(id =>
     document.getElementById(id).classList.remove('show'));
   document.getElementById('downloadBtn').classList.remove('show');
-  switchTab('html');
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
