@@ -828,14 +828,28 @@ function readAndAddFile(file, tab) {
   });
 }
 
+// 空のデフォルトファイルを削除するヘルパー
+function removeEmptyDefaults(tab) {
+  const defaultNames = ['index.html','page2.html','page3.html','style.css','style2.css','style3.css','script.js','script2.js','script3.js'];
+  files[tab] = files[tab].filter(f => {
+    const isEmpty = !f.code.trim();
+    const isDefault = defaultNames.includes(f.name);
+    return !(isEmpty && isDefault);
+  });
+}
+
 async function handleFileInput(event, tab) {
   const fileArr = Array.from(event.target.files);
+  const affectedTabs = new Set();
   for (const file of fileArr) {
     const detectedTab = getTabFromExt(file.name);
     const targetTab = detectedTab || tab;
+    // 読み込み前に空のデフォルトファイルを削除
+    removeEmptyDefaults(targetTab);
     await readAndAddFile(file, targetTab);
-    renderFileList(targetTab);
+    affectedTabs.add(targetTab);
   }
+  affectedTabs.forEach(t => renderFileList(t));
   event.target.value = '';
 }
 
@@ -852,12 +866,16 @@ async function onDrop(event, tab, zoneId) {
   event.preventDefault();
   document.getElementById(zoneId).classList.remove('dragover');
   const fileArr = Array.from(event.dataTransfer.files);
+  const affectedTabs = new Set();
   for (const file of fileArr) {
     const detectedTab = getTabFromExt(file.name);
     const targetTab = detectedTab || tab;
+    // 読み込み前に空のデフォルトファイルを削除
+    removeEmptyDefaults(targetTab);
     await readAndAddFile(file, targetTab);
-    renderFileList(targetTab);
+    affectedTabs.add(targetTab);
   }
+  affectedTabs.forEach(t => renderFileList(t));
 }
 
 // ── Image upload (複数対応) ────────────────────────
