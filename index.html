@@ -1426,24 +1426,24 @@ async function autoFix() {
 
   // HTMLファイルから<style>タグを抽出してCSSファイルに移動
   const extractedCssParts = [];
+  const extractedJsParts  = [];
 
   const processedHtmlFiles = allFiles
     .filter(f => f.tab === 'html')
     .map(f => {
       const fname = f.name || 'index.html';
       let html = f.code;
-      // <style>〜</style> を全て抽出
+
+      // ── <style> 抽出 ──────────────────────────────
       const styleReg = /<style[^>]*>([\s\S]*?)<\/style>/gi;
-      const extracted = [];
+      const cssExtracted = [];
       let match;
       while ((match = styleReg.exec(html)) !== null) {
-        extracted.push(match[1].trim());
+        cssExtracted.push(match[1].trim());
       }
-      if (extracted.length > 0) {
-        extractedCssParts.push(...extracted);
-        // HTMLから<style>タグを削除し、<link>タグを追加
+      if (cssExtracted.length > 0) {
+        extractedCssParts.push(...cssExtracted);
         html = html.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
-        // 既存の<link rel="stylesheet">がなければ</head>直前に追加
         const linkTag = '<link rel="stylesheet" href="style.css">';
         if (!html.includes('rel="stylesheet"')) {
           html = html.includes('</head>')
@@ -1451,35 +1451,66 @@ async function autoFix() {
             : linkTag + '\n' + html;
         }
       }
+
+      // ── <script> 抽出（src属性のない内部スクリプトのみ）──
+      const scriptReg = /<script(?![^>]*\bsrc\b)[^>]*>([\s\S]*?)<\/script>/gi;
+      const jsExtracted = [];
+      scriptReg.lastIndex = 0;
+      while ((match = scriptReg.exec(html)) !== null) {
+        const code = match[1].trim();
+        if (code) jsExtracted.push(code);
+      }
+      if (jsExtracted.length > 0) {
+        extractedJsParts.push(...jsExtracted);
+        // 内部スクリプトタグを削除
+        html = html.replace(/<script(?![^>]*\bsrc\b)[^>]*>[\s\S]*?<\/script>/gi, '');
+        // 既存の<script src="script.js">がなければ</body>直前に追加
+        const scriptTag = '<scr' + 'ipt src="script.js"></scr' + 'ipt>';
+        if (!html.includes('src="script.js"')) {
+          html = html.includes('</body>')
+            ? html.replace('</body>', `  ${scriptTag}\n</body>`)
+            : html + `\n${scriptTag}`;
+        }
+      }
+
       return { ...f, code: html, name: fname };
     });
 
   // 各ファイルに修正を適用
   allFiles.forEach(f => {
-    const fname = f.name || (f.tab === 'html' ? 'index.html' : f.tab === 'css' ? 'style.css' : 'main.js');
+    const fname = f.name || (f.tab === 'html' ? 'index.html' : f.tab === 'css' ? 'style.css' : 'script.js');
     let fixed = f.code;
 
     if (f.tab === 'html') {
-      // HTMLから抽出済みのコードを使用
       const processed = processedHtmlFiles.find(p => p.name === fname);
       fixed = processed ? processed.code : f.code;
     } else if (f.tab === 'css') {
-      // 抽出したCSSをCSSファイルの先頭に追加した上で修正適用済みCSSで書き換え
       const extracted = extractedCssParts.length > 0
         ? `/* HTMLから移動 */\n${extractedCssParts.join('\n\n')}\n\n`
         : '';
       fixed = extracted + cssBlock;
+    } else if (f.tab === 'js') {
+      // JSファイルがある場合：抽出したJSを先頭に追加
+      const extracted = extractedJsParts.length > 0
+        ? `/* HTMLから移動 */\n${extractedJsParts.join('\n\n')}\n\n`
+        : '';
+      fixed = extracted + f.code;
     }
-    // JSファイルはそのまま
 
-    const fixedName = fname.replace(/(\.[^.]+)$/, '_fixed$1');
+    const fixedName = fname; // 入力ファイル名をそのまま使用
     fixedFiles.push({ name: fixedName, content: fixed, mime: f.mime });
   });
 
-  // HTMLから抽出したCSSがあるがCSSファイルがない場合、新規style_fixed.cssを作成
+  // HTMLから抽出したCSSがあるがCSSファイルがない場合、新規 style_fixed.css を作成
   if (extractedCssParts.length > 0 && !allFiles.some(f => f.tab === 'css')) {
     const newCss = `/* HTMLから移動 */\n${extractedCssParts.join('\n\n')}\n\n/* PixelPerfect Layer - AI修正 ${date} */\n${cssBlock}`;
-    fixedFiles.push({ name: 'style_fixed.css', content: newCss, mime: 'text/css' });
+    fixedFiles.push({ name: 'style.css', content: newCss, mime: 'text/css' });
+  }
+
+  // HTMLから抽出したJSがあるがJSファイルがない場合、新規 script_fixed.js を作成
+  if (extractedJsParts.length > 0 && !allFiles.some(f => f.tab === 'js')) {
+    const newJs = `/* HTMLから移動 */\n${extractedJsParts.join('\n\n')}`;
+    fixedFiles.push({ name: 'script.js', content: newJs, mime: 'text/javascript' });
   }
 
   // ダウンロードボタンリストを生成
