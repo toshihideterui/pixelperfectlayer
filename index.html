@@ -505,6 +505,25 @@
   }
   .add-file-btn:hover { border-color: var(--accent); color: var(--accent); }
 
+  .code-drop-zone {
+    border: 2px dashed var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--surface2);
+    margin-bottom: 6px;
+    user-select: none;
+  }
+  .code-drop-zone:hover, .code-drop-zone.dragover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(0,255,136,0.04);
+  }
+
   /* コード生成ボタン */
   .generate-btn {
     width: 100%;
@@ -640,7 +659,7 @@
 
   <!-- STEP 2 -->
   <div class="panel">
-    <div class="panel-title">STEP 2 — 現状のソースコードを貼り付け（複数ファイル可）</div>
+    <div class="panel-title">STEP 2 — ソースコードを追加（貼付け・ファイル選択・ドロップ）</div>
 
     <div class="code-section">
       <div class="code-section-header">
@@ -648,7 +667,18 @@
         <span class="code-section-label">HTMLファイル</span>
       </div>
       <div id="htmlFileList" class="file-list"></div>
-      <button class="add-file-btn" onclick="addFile('html')">＋ HTMLを追加</button>
+      <div class="add-file-row">
+        <input type="file" id="htmlFileInput" accept=".html,.htm" multiple style="display:none"
+          onchange="handleFileInput(event,'html')">
+        <div class="code-drop-zone" id="htmlDropZone"
+          onclick="document.getElementById('htmlFileInput').click()"
+          ondragover="onDropOver(event,'htmlDropZone')"
+          ondragleave="onDropLeave('htmlDropZone')"
+          ondrop="onDrop(event,'html','htmlDropZone')">
+          📄 タップまたはドロップでHTMLファイルを追加
+        </div>
+        <button class="add-file-btn" onclick="addFile('html')">＋ 手入力で追加</button>
+      </div>
     </div>
 
     <div class="code-section">
@@ -657,7 +687,18 @@
         <span class="code-section-label">CSS / SCSSファイル</span>
       </div>
       <div id="cssFileList" class="file-list"></div>
-      <button class="add-file-btn" onclick="addFile('css')">＋ CSS/SCSSを追加</button>
+      <div class="add-file-row">
+        <input type="file" id="cssFileInput" accept=".css,.scss,.sass" multiple style="display:none"
+          onchange="handleFileInput(event,'css')">
+        <div class="code-drop-zone" id="cssDropZone"
+          onclick="document.getElementById('cssFileInput').click()"
+          ondragover="onDropOver(event,'cssDropZone')"
+          ondragleave="onDropLeave('cssDropZone')"
+          ondrop="onDrop(event,'css','cssDropZone')">
+          🎨 タップまたはドロップでCSS/SCSSファイルを追加
+        </div>
+        <button class="add-file-btn" onclick="addFile('css')">＋ 手入力で追加</button>
+      </div>
     </div>
 
     <div class="code-section">
@@ -666,12 +707,23 @@
         <span class="code-section-label">JavaScriptファイル</span>
       </div>
       <div id="jsFileList" class="file-list"></div>
-      <button class="add-file-btn" onclick="addFile('js')">＋ JavaScriptを追加</button>
+      <div class="add-file-row">
+        <input type="file" id="jsFileInput" accept=".js,.mjs,.ts" multiple style="display:none"
+          onchange="handleFileInput(event,'js')">
+        <div class="code-drop-zone" id="jsDropZone"
+          onclick="document.getElementById('jsFileInput').click()"
+          ondragover="onDropOver(event,'jsDropZone')"
+          ondragleave="onDropLeave('jsDropZone')"
+          ondrop="onDrop(event,'js','jsDropZone')">
+          ⚡ タップまたはドロップでJSファイルを追加
+        </div>
+        <button class="add-file-btn" onclick="addFile('js')">＋ 手入力で追加</button>
+      </div>
     </div>
 
     <div class="code-hint">
-      ※ 各セクションに複数ファイルを追加できます。<br>
-      ※ HTMLを貼ると、分析後に修正済みファイルをダウンロードできます。
+      ※ ファイルを選択・ドロップするとコードが自動で読み込まれます。<br>
+      ※ HTMLを追加すると、分析後に修正済みファイルをダウンロードできます。
     </div>
   </div>
 
@@ -746,6 +798,67 @@ function toggleVis(id) {
 
 // ── Tab (廃止・後方互換のみ) ─────────────────────────
 function switchTab(tab) { /* タブUI廃止 */ }
+
+// ── STEP2 ファイル読み込み ─────────────────────────
+function getTabFromExt(filename) {
+  const ext = filename.split('.').pop().toLowerCase();
+  if (['html','htm'].includes(ext))        return 'html';
+  if (['css','scss','sass'].includes(ext)) return 'css';
+  if (['js','mjs','ts'].includes(ext))     return 'js';
+  return null;
+}
+
+function getFileType(filename) {
+  const ext = filename.split('.').pop().toLowerCase();
+  if (ext === 'scss' || ext === 'sass') return 'scss';
+  if (ext === 'js' || ext === 'mjs' || ext === 'ts') return 'js';
+  return ext; // html, css
+}
+
+function readAndAddFile(file, tab) {
+  return new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const id = ++fileIdCounter;
+      const type = getFileType(file.name);
+      files[tab].push({ id, name: file.name, code: e.target.result, type });
+      resolve();
+    };
+    reader.readAsText(file, 'utf-8');
+  });
+}
+
+async function handleFileInput(event, tab) {
+  const fileArr = Array.from(event.target.files);
+  for (const file of fileArr) {
+    const detectedTab = getTabFromExt(file.name);
+    const targetTab = detectedTab || tab;
+    await readAndAddFile(file, targetTab);
+    renderFileList(targetTab);
+  }
+  event.target.value = '';
+}
+
+function onDropOver(event, zoneId) {
+  event.preventDefault();
+  document.getElementById(zoneId).classList.add('dragover');
+}
+
+function onDropLeave(zoneId) {
+  document.getElementById(zoneId).classList.remove('dragover');
+}
+
+async function onDrop(event, tab, zoneId) {
+  event.preventDefault();
+  document.getElementById(zoneId).classList.remove('dragover');
+  const fileArr = Array.from(event.dataTransfer.files);
+  for (const file of fileArr) {
+    const detectedTab = getTabFromExt(file.name);
+    const targetTab = detectedTab || tab;
+    await readAndAddFile(file, targetTab);
+    renderFileList(targetTab);
+  }
+}
 
 // ── Image upload (複数対応) ────────────────────────
 (function() {
