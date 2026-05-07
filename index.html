@@ -727,6 +727,21 @@
     </div>
   </div>
 
+  <!-- JS指示欄（常時表示） -->
+  <div class="panel" style="margin-bottom:14px;">
+    <div class="panel-title">JavaScript への追加・修正指示（任意）</div>
+    <textarea class="code-input" id="jsRequestInput" style="min-height:90px;color:var(--text);"
+      placeholder="例:
+・ハンバーガーメニューを開閉できるようにしたい
+・スクロールしたらヘッダーを固定したい
+・画像をクリックしたらモーダルで拡大表示したい
+
+※ 空欄の場合はJSファイルをそのまま出力します"></textarea>
+    <div style="font-size:10px;color:var(--text-dim);margin-top:6px;">
+      ※ JSファイルがない場合は新規作成します。空欄ならJSは変更しません。
+    </div>
+  </div>
+
   <div class="warn-box" id="warnBox"></div>
 
   <button class="generate-btn" id="generateBtn" onclick="generateCode()">✨ コードをゼロから生成する（画像→コード）</button>
@@ -757,16 +772,16 @@
     <div class="fix-panel" id="fixPanel">
       <div class="panel">
         <div class="panel-title">STEP 3 — 自動修正してダウンロード</div>
+
         <button class="fix-btn" id="fixBtn" onclick="autoFix()">✨ コードに修正を適用してダウンロード</button>
         <div class="fix-loading" id="fixLoading">
           <div class="fix-spinner"></div>
-          <div class="loading-text">修正CSSを生成中...</div>
+          <div class="loading-text">修正中...</div>
         </div>
         <div class="fix-success" id="fixSuccess">✅ 修正完了！ダウンロードしてください。</div>
         <button class="download-btn" id="downloadBtn" onclick="downloadFixed()">⬇️ 修正済みHTMLをダウンロード</button>
         <div class="fix-note">
-          ※ STEP 2のHTMLにCSSの修正を適用してダウンロードします。<br>
-          ※ CSSも貼っている場合は一緒に埋め込まれます。
+          ※ CSS修正・JS指示・HTMLからの抽出を一括で処理します。
         </div>
       </div>
     </div>
@@ -1501,6 +1516,8 @@ async function autoFix() {
     return;
   }
 
+  const jsRequest = document.getElementById('jsRequestInput')?.value.trim() || '';
+
   const fixList = currentIssues
     .filter(i => i.fix)
     .map((i, idx) => `${idx + 1}. ${i.selector} { ${i.fix} }`)
@@ -1628,12 +1645,16 @@ async function autoFix() {
       fixed = extracted + f.code;
     }
 
-    // SCSSタイプのファイルは拡張子を.scssに変換
+    // SCSSタイプのファイルは.scssで出力し、CSSも併せて出力
     let fixedName = fname;
     if (f.tab === 'css' && f.type === 'scss') {
       fixedName = fname.replace(/\.css$/i, '.scss');
+      fixedFiles.push({ name: fixedName, content: fixed, mime: 'text/css' });
+      // CSS版も同時出力（拡張子は元のまま .css）
+      fixedFiles.push({ name: fname, content: fixed, mime: 'text/css' });
+    } else {
+      fixedFiles.push({ name: fixedName, content: fixed, mime: f.mime });
     }
-    fixedFiles.push({ name: fixedName, content: fixed, mime: f.mime });
   });
 
   // HTMLから抽出したCSSがあるがCSSファイルがない場合、新規 style.css を作成
@@ -1644,10 +1665,64 @@ async function autoFix() {
     fixedFiles.push({ name: hasScss ? 'style.scss' : 'style.css', content: newCss, mime: 'text/css' });
   }
 
-  // HTMLから抽出したJSがあるがJSファイルがない場合、新規 script_fixed.js を作成
+  // HTMLから抽出したJSがあるがJSファイルがない場合、新規 script.js を作成
   if (extractedJsParts.length > 0 && !allFiles.some(f => f.tab === 'js')) {
     const newJs = `/* HTMLから移動 */\n${extractedJsParts.join('\n\n')}`;
     fixedFiles.push({ name: 'script.js', content: newJs, mime: 'text/javascript' });
+  }
+
+  // ── JS指示がある場合：AIにJS修正を依頼して該当ファイルを上書き ──
+  if (jsRequest) {
+    document.querySelector('#fixLoading .loading-text').textContent = 'JavaScriptを修正中...';
+
+    // 対象JSファイルを特定（fixedFiles内のJS）
+    const jsTargets = fixedFiles.filter(f =>
+      f.name.endsWith('.js') || f.name.endsWith('.mjs') || f.name.endsWith('.ts')
+    );
+
+    const existingJs = jsTargets.map(f => `/* ${f.name} */\n${f.content}`).join('\n\n');
+    const jsPrompt = existingJs
+      ? `以下のJavaScriptに対して指示を実装してください。既存コードと整合性を保ち、完成したコードのみ返してください（\`\`\`不要）。\n\n【既存JS】\n${compressCode(existingJs, 3000)}\n\n【指示】\n${jsRequest}`
+      : `以下の指示を実装したJavaScriptを書いてください。コードのみ返してください（\`\`\`不要）。\n\n【指示】\n${jsRequest}`;
+
+    try {
+      const jsRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${groqKey}` },
+        body: JSON.stringify({
+          model: 'llama-3.3-70b-versatile',
+          max_tokens: 3000,
+          temperature: 0.3,
+          messages: [{ role: 'user', content: jsPrompt }]
+        })
+      });
+
+      if (jsRes.status === 429) {
+        const err = await jsRes.json().catch(() => ({}));
+        const msg = err.error?.message || '';
+        const match = msg.match(/try again in ([0-9.]+)s/);
+        const waitSec = match ? Math.ceil(parseFloat(match[1])) + 2 : 30;
+        await waitAndRetry(waitSec, 'JS修正');
+      }
+
+      if (jsRes.ok) {
+        const jsData = await jsRes.json();
+        let newJsCode = jsData.choices?.[0]?.message?.content?.trim() || '';
+        newJsCode = newJsCode.replace(/```[\w]*\n?/g, '').replace(/```/g, '').trim();
+
+        if (jsTargets.length > 0) {
+          // 既存JSファイルを上書き（最初のJSファイルに集約）
+          const targetName = jsTargets[0].name;
+          const idx = fixedFiles.findIndex(f => f.name === targetName);
+          if (idx !== -1) fixedFiles[idx].content = newJsCode;
+        } else {
+          // JSファイルがなければ新規作成
+          fixedFiles.push({ name: 'script.js', content: newJsCode, mime: 'text/javascript' });
+        }
+      }
+    } catch(e) {
+      console.warn('JS修正エラー:', e);
+    }
   }
 
   // ダウンロードボタンリストを生成
@@ -1660,7 +1735,12 @@ async function autoFix() {
   reportLines.push('【修正ファイル一覧】');
   fixedFiles.forEach(f => reportLines.push(`  - ${f.name}`));
   reportLines.push('');
-  reportLines.push('【修正内容一覧】');
+  if (jsRequest) {
+    reportLines.push('【JavaScript 追加・修正指示】');
+    reportLines.push(jsRequest);
+    reportLines.push('');
+  }
+  reportLines.push('【CSS修正内容一覧】');
   reportLines.push('-'.repeat(40));
   currentIssues.forEach((issue, i) => {
     const sev = issue.severity === 'high' ? '🔴 HIGH' : issue.severity === 'medium' ? '🟡 MED' : '🟢 LOW';
@@ -1771,6 +1851,8 @@ function resetAll() {
   renderPreviews();
   renderFileList('html'); renderFileList('css'); renderFileList('js');
   document.getElementById('designInput').value = '';
+  const jsReqEl = document.getElementById('jsRequestInput');
+  if (jsReqEl) jsReqEl.value = '';
   ['results','errorBox','warnBox','fixPanel','fixSuccess'].forEach(id =>
     document.getElementById(id).classList.remove('show'));
   document.getElementById('downloadBtn').classList.remove('show');
