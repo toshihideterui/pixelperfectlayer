@@ -1592,8 +1592,10 @@ async function autoFix() {
       if (cssExtracted.length > 0) {
         extractedCssParts.push(...cssExtracted);
         html = html.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
-        const linkTag = '<link rel="stylesheet" href="style.css">';
-        if (!html.includes('rel="stylesheet"')) {
+        // 既存のCSSファイルリンクがなければ追加（パス問わず.cssへの参照を確認）
+        const hasCssLink = /href=["'][^"']*\.css["']/i.test(html);
+        if (!hasCssLink) {
+          const linkTag = '<link rel="stylesheet" href="style.css">';
           html = html.includes('</head>')
             ? html.replace('</head>', `  ${linkTag}\n</head>`)
             : linkTag + '\n' + html;
@@ -1614,7 +1616,10 @@ async function autoFix() {
         html = html.replace(/<script(?![^>]*\bsrc\b)[^>]*>[\s\S]*?<\/script>/gi, '');
         // 既存の<script src="script.js">がなければ</body>直前に追加
         const scriptTag = '<scr' + 'ipt src="script.js"></scr' + 'ipt>';
-        if (!html.includes('src="script.js"')) {
+        // パス問わずscript.jsへの参照が既にあれば追加しない
+        const hasScriptLink = /src=["'][^"']*script\.js["']/i.test(html)
+          || /src=["'][^"']*\.js["']/i.test(html);
+        if (!hasScriptLink) {
           html = html.includes('</body>')
             ? html.replace('</body>', `  ${scriptTag}\n</body>`)
             : html + `\n${scriptTag}`;
