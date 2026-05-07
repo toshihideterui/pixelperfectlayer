@@ -627,7 +627,7 @@
 <div class="settings-panel" id="settingsPanel">
   <div class="settings-title">// API KEY SETTINGS</div>
   <div style="font-size:10px;color:var(--text-dim);margin-bottom:10px;">
-    優先順位: Groq → Gemini → Claude。上限に達したら次のキーに自動切替。
+    優先順位: Groq → Gemma → Claude。上限に達したら次のキーに自動切替。
   </div>
   <div class="api-row">
     <div class="api-label">GROQ</div>
@@ -635,8 +635,8 @@
     <button class="toggle-btn" onclick="toggleVis('groqKeyInput')">👁</button>
   </div>
   <div class="api-row">
-    <div class="api-label">GEMINI</div>
-    <input type="password" class="api-input" id="geminiKeyInput" placeholder="AIza...">
+    <div class="api-label">GEMMA</div>
+    <input type="password" class="api-input" id="geminiKeyInput" placeholder="AIza... (Gemini APIキー)">
     <button class="toggle-btn" onclick="toggleVis('geminiKeyInput')">👁</button>
   </div>
   <div class="api-row">
@@ -870,7 +870,7 @@ async function callGemini(messages, images = [], maxTokens = 1200) {
   });
   parts.push(...textParts);
   const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemma-3-27b-it:generateContent?key=${key}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -953,19 +953,19 @@ async function callAI(prompt, images = [], maxTokens = 1200) {
     } catch(e) {
       errors.push(`Groq: ${e.message}`);
       if (!e.isRateLimit) throw e; // レート制限以外はすぐ投げる
-      updateLoadingText('Groq上限。Geminiで再試行中...');
+      updateLoadingText('Groq上限。Gemmaで再試行中...');
     }
   }
 
-  // Gemini（フォールバック）
+  // Gemma（フォールバック）※Visionは非対応なので画像なし時のみ
   const geminiKey = getGeminiKey();
-  if (geminiKey) {
+  if (geminiKey && !useVision) {
     try {
-      return await callGemini([{ role: 'user', content: prompt }], images, maxTokens);
+      return await callGemini([{ role: 'user', content: prompt }], [], maxTokens);
     } catch(e) {
-      errors.push(`Gemini: ${e.message}`);
+      errors.push(`Gemma: ${e.message}`);
       if (!e.isRateLimit) throw e;
-      updateLoadingText('Gemini上限。Claudeで再試行中...');
+      updateLoadingText('Gemma上限。Claudeで再試行中...');
     }
   }
 
