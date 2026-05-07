@@ -839,7 +839,15 @@ const BADGE_CLASS = { html: 'badge-html', css: 'badge-css', scss: 'badge-scss', 
 function addFile(tab) {
   const id = ++fileIdCounter;
   const defaultType = tab === 'css' ? 'css' : tab;
-  files[tab].push({ id, name: '', code: '', type: defaultType });
+  // タブごとのデフォルトファイル名（同タブ内の連番）
+  const count = files[tab].length;
+  const defaultNames = {
+    html: count === 0 ? 'index.html' : `page${count + 1}.html`,
+    css:  count === 0 ? 'style.css'  : `style${count + 1}.css`,
+    js:   count === 0 ? 'script.js'  : `script${count + 1}.js`
+  };
+  const defaultName = defaultNames[tab] || '';
+  files[tab].push({ id, name: defaultName, code: '', type: defaultType });
   renderFileList(tab);
   // 追加したテキストエリアにフォーカス
   setTimeout(() => {
