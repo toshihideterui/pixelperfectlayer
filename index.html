@@ -1374,29 +1374,72 @@ async function autoFix() {
   const date = new Date().toLocaleDateString('ja-JP');
   const injection = `\n/* PixelPerfect Layer - AI修正 ${date} */\n${cssBlock}\n`;
 
-  // CSSファイルがない場合は警告
+  // CSSファイルもHTMLのstyleタグもない場合は警告
   const hasCssFile = allFiles.some(f => f.tab === 'css');
-  if (!hasCssFile) {
-    showError('修正を反映するにはSTEP 2のCSS/SCSSタブにファイルを追加してください。');
+  const hasStyleTag = allFiles.some(f => f.tab === 'html' && /<style/i.test(f.code));
+  if (!hasCssFile && !hasStyleTag) {
+    showError('CSSファイルかHTMLの<style>タグが必要です。STEP 2にCSSを追加してください。');
     setFixLoading(false);
     return;
   }
 
+  // HTMLファイルから<style>タグを抽出してCSSファイルに移動
+  const extractedCssParts = [];
+
+  const processedHtmlFiles = allFiles
+    .filter(f => f.tab === 'html')
+    .map(f => {
+      const fname = f.name || 'index.html';
+      let html = f.code;
+      // <style>〜</style> を全て抽出
+      const styleReg = /<style[^>]*>([\s\S]*?)<\/style>/gi;
+      const extracted = [];
+      let match;
+      while ((match = styleReg.exec(html)) !== null) {
+        extracted.push(match[1].trim());
+      }
+      if (extracted.length > 0) {
+        extractedCssParts.push(...extracted);
+        // HTMLから<style>タグを削除し、<link>タグを追加
+        html = html.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
+        // 既存の<link rel="stylesheet">がなければ</head>直前に追加
+        const linkTag = '<link rel="stylesheet" href="style.css">';
+        if (!html.includes('rel="stylesheet"')) {
+          html = html.includes('</head>')
+            ? html.replace('</head>', `  ${linkTag}\n</head>`)
+            : linkTag + '\n' + html;
+        }
+      }
+      return { ...f, code: html, name: fname };
+    });
+
   // 各ファイルに修正を適用
   allFiles.forEach(f => {
     const fname = f.name || (f.tab === 'html' ? 'index.html' : f.tab === 'css' ? 'style.css' : 'main.js');
-    const ext = fname.split('.').pop().toLowerCase();
     let fixed = f.code;
 
-    if (f.tab === 'css') {
-      // 修正適用済みCSSで丸ごと書き換え
-      fixed = cssBlock;
+    if (f.tab === 'html') {
+      // HTMLから抽出済みのコードを使用
+      const processed = processedHtmlFiles.find(p => p.name === fname);
+      fixed = processed ? processed.code : f.code;
+    } else if (f.tab === 'css') {
+      // 抽出したCSSをCSSファイルの先頭に追加した上で修正適用済みCSSで書き換え
+      const extracted = extractedCssParts.length > 0
+        ? `/* HTMLから移動 */\n${extractedCssParts.join('\n\n')}\n\n`
+        : '';
+      fixed = extracted + cssBlock;
     }
-    // HTML・JSファイルはそのまま
+    // JSファイルはそのまま
 
     const fixedName = fname.replace(/(\.[^.]+)$/, '_fixed$1');
     fixedFiles.push({ name: fixedName, content: fixed, mime: f.mime });
   });
+
+  // HTMLから抽出したCSSがあるがCSSファイルがない場合、新規style_fixed.cssを作成
+  if (extractedCssParts.length > 0 && !allFiles.some(f => f.tab === 'css')) {
+    const newCss = `/* HTMLから移動 */\n${extractedCssParts.join('\n\n')}\n\n/* PixelPerfect Layer - AI修正 ${date} */\n${cssBlock}`;
+    fixedFiles.push({ name: 'style_fixed.css', content: newCss, mime: 'text/css' });
+  }
 
   // ダウンロードボタンリストを生成
   renderDownloadButtons();
