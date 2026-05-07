@@ -1628,14 +1628,20 @@ async function autoFix() {
       fixed = extracted + f.code;
     }
 
-    const fixedName = fname; // 入力ファイル名をそのまま使用
+    // SCSSタイプのファイルは拡張子を.scssに変換
+    let fixedName = fname;
+    if (f.tab === 'css' && f.type === 'scss') {
+      fixedName = fname.replace(/\.css$/i, '.scss');
+    }
     fixedFiles.push({ name: fixedName, content: fixed, mime: f.mime });
   });
 
-  // HTMLから抽出したCSSがあるがCSSファイルがない場合、新規 style_fixed.css を作成
+  // HTMLから抽出したCSSがあるがCSSファイルがない場合、新規 style.css を作成
   if (extractedCssParts.length > 0 && !allFiles.some(f => f.tab === 'css')) {
     const newCss = `/* HTMLから移動 */\n${extractedCssParts.join('\n\n')}\n\n/* PixelPerfect Layer - AI修正 ${date} */\n${cssBlock}`;
-    fixedFiles.push({ name: 'style.css', content: newCss, mime: 'text/css' });
+    // SCSSファイルが1つでもあればscssで出力
+    const hasScss = allFiles.some(f => f.tab === 'css' && f.type === 'scss');
+    fixedFiles.push({ name: hasScss ? 'style.scss' : 'style.css', content: newCss, mime: 'text/css' });
   }
 
   // HTMLから抽出したJSがあるがJSファイルがない場合、新規 script_fixed.js を作成
