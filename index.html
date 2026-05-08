@@ -1681,8 +1681,16 @@ issuesは最大20件。コードがある場合は実際のセレクタ名を使
   async function analyzeGroup(images, label) {
     const groupPrompt = prompt + (label ? `\n\n※ これは【${label}デザイン】の画像です。${label}向けのCSSを中心に指摘してください。` : '');
     const text = await callAI(groupPrompt, images, 2000);
-    try { return JSON.parse(text.replace(/```json|```/g, '').trim()); }
-    catch { return { summary: text, issueCount: 0, issues: [] }; }
+    // JSONの抽出を強化：{ ... } の部分だけ取り出す
+    const cleaned = text.replace(/```json|```/g, '').trim();
+    const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+    try {
+      return JSON.parse(jsonMatch ? jsonMatch[0] : cleaned);
+    } catch {
+      // パース失敗時は空のissuesを返す（生テキストは表示しない）
+      console.warn('JSON parse failed:', text.slice(0, 200));
+      return { summary: label ? `${label}デザインの分析に失敗しました。` : '分析に失敗しました。', issueCount: 0, issues: [] };
+    }
   }
 
   try {
@@ -1717,8 +1725,14 @@ issuesは最大20件。コードがある場合は実際のセレクタ名を使
       // 画像なし：テキストのみで分析
       const text = await callAI(prompt, [], 2000);
       let parsed;
-      try { parsed = JSON.parse(text.replace(/```json|```/g, '').trim()); }
-      catch { parsed = { summary: text, issueCount: 0, issues: [] }; }
+      try {
+        const cleaned = text.replace(/```json|```/g, '').trim();
+        const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+        parsed = JSON.parse(jsonMatch ? jsonMatch[0] : cleaned);
+      } catch {
+        console.warn('JSON parse failed:', text.slice(0, 200));
+        parsed = { summary: '分析に失敗しました。再試行してください。', issueCount: 0, issues: [] };
+      }
       summaries.push(parsed.summary || '');
       allIssues = parsed.issues || [];
     }
@@ -1804,7 +1818,10 @@ function showResults(data) {
   const countEl = document.getElementById('issueCount');
   countEl.textContent = `${count} issues`;
   countEl.className   = 'issue-count' + (count === 0 ? ' ok' : '');
-  document.getElementById('summaryBox').textContent = data.summary || '';
+  const summaryText = data.summary || '';
+  // summaryが異常に長い（JSONが混入）場合は切り詰め
+  document.getElementById('summaryBox').textContent =
+    summaryText.length > 300 ? summaryText.slice(0, 300) + '...' : summaryText;
 
   const list = document.getElementById('issueList');
   list.innerHTML = '';
