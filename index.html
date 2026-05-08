@@ -627,7 +627,7 @@
 <div class="settings-panel" id="settingsPanel">
   <div class="settings-title">// API KEY SETTINGS</div>
   <div style="font-size:10px;color:var(--text-dim);margin-bottom:10px;">
-    優先順位: Groq → Gemma → OpenRouter → Claude。上限時に自動切替。
+    優先順位: Groq → OpenRouter → Gemma → Claude。上限時に自動切替。
   </div>
   <div class="api-row">
     <div class="api-label">GROQ</div>
@@ -965,25 +965,14 @@ async function callAI(prompt, images = [], maxTokens = 1200) {
     }
   }
 
-  // Gemma（フォールバック）※Visionは非対応なので画像なし時のみ
-  const geminiKey = getGeminiKey();
-  if (geminiKey && !useVision) {
-    try {
-      return await callGemini([{ role: 'user', content: prompt }], [], maxTokens);
-    } catch(e) {
-      errors.push(`Gemma: ${e.message}`);
-      if (!e.isRateLimit) throw e;
-      updateLoadingText('Gemma上限。Claudeで再試行中...');
-    }
-  }
-
   // OpenRouter（フォールバック・Vision対応モデルあり）
   const openrouterKey = getOpenRouterKey();
   if (openrouterKey) {
     try {
+      // openrouter/free は Vision対応を含む無料モデルを自動選択
       const orModel = useVision
-        ? 'meta-llama/llama-4-scout:free'
-        : 'meta-llama/llama-3.3-70b-instruct:free';
+        ? 'qwen/qwen2.5-vl-32b-instruct:free'
+        : 'openrouter/auto';
       let orContent;
       if (useVision) {
         orContent = [];
@@ -1015,6 +1004,18 @@ async function callAI(prompt, images = [], maxTokens = 1200) {
       errors.push(`OpenRouter: ${e.message}`);
       if (!e.isRateLimit) throw e;
       updateLoadingText('OpenRouter上限。Claudeで再試行中...');
+    }
+  }
+
+  // Gemma（フォールバック）※Visionは非対応なので画像なし時のみ
+  const geminiKey = getGeminiKey();
+  if (geminiKey && !useVision) {
+    try {
+      return await callGemini([{ role: 'user', content: prompt }], [], maxTokens);
+    } catch(e) {
+      errors.push(`Gemma: ${e.message}`);
+      if (!e.isRateLimit) throw e;
+      updateLoadingText('Gemma上限。Claudeで再試行中...');
     }
   }
 
