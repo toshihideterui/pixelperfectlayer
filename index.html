@@ -1686,10 +1686,11 @@ issuesは最大20件。コードがある場合は実際のセレクタ名を使
     const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
     try {
       return JSON.parse(jsonMatch ? jsonMatch[0] : cleaned);
-    } catch {
-      // パース失敗時は空のissuesを返す（生テキストは表示しない）
-      console.warn('JSON parse failed:', text.slice(0, 200));
-      return { summary: label ? `${label}デザインの分析に失敗しました。` : '分析に失敗しました。', issueCount: 0, issues: [] };
+    } catch(parseErr) {
+      // パース失敗時：実際の返答をsummaryとして表示してデバッグしやすくする
+      console.warn('JSON parse failed. Raw text:', text);
+      const preview = text.slice(0, 150).replace(/\n/g, ' ');
+      return { summary: `[${label||''}分析失敗] AIの返答: ${preview}`, issueCount: 0, issues: [] };
     }
   }
 
