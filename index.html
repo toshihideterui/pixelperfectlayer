@@ -336,6 +336,78 @@
   .copy-btn { margin-top: 5px; background: transparent; border: 1px solid var(--border); color: var(--text-dim); font-family: 'Space Mono', monospace; font-size: 9px; padding: 3px 9px; border-radius: 4px; cursor: pointer; transition: all 0.15s; }
   .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
 
+  /* 修正トグル */
+  .issue-toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  .toggle-switch {
+    position: relative;
+    width: 44px;
+    height: 22px;
+    flex-shrink: 0;
+  }
+  .toggle-switch input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: var(--border);
+    border-radius: 22px;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  .toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 16px; height: 16px;
+    left: 3px; top: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: 0.2s;
+  }
+  .toggle-switch input:checked + .toggle-slider { background: var(--accent); }
+  .toggle-switch input:checked + .toggle-slider::before { transform: translateX(22px); }
+  .toggle-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--text-dim);
+    transition: color 0.2s;
+  }
+  .toggle-label.on { color: var(--accent); }
+  .issue-card.disabled-fix {
+    opacity: 0.45;
+  }
+  .select-all-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding: 8px 12px;
+    background: var(--surface2);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+  .select-all-row span {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    flex: 1;
+  }
+  .select-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    padding: 3px 9px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .select-btn:hover { border-color: var(--accent); color: var(--accent); }
+
   .fix-panel { display: none; margin-top: 16px; }
   .fix-panel.show { display: block; }
 
@@ -614,7 +686,7 @@
   }
 </style>
 </head>
-<body>
+<body onload="window.scrollTo(0,0)">
 
 <header>
   <div style="display:flex;align-items:center;gap:10px">
@@ -657,22 +729,53 @@
 
   <!-- STEP 1 -->
   <div class="panel">
-    <div class="panel-title">STEP 1 — デザインカンプ画像（任意・複数可・あると精度UP）</div>
-    <div class="upload-box" id="designBox">
-      <input type="file" id="designInput" accept="image/*,image/png,image/jpeg,image/gif,image/webp,image/svg+xml" multiple>
-      <span class="upload-icon">🎨</span>
-      <div class="upload-sub">
-        <strong>DESIGN IMAGE</strong>
-        複数画像タップまたはドロップ（最大20枚）
+    <div class="panel-title">STEP 1 — デザインカンプ画像（PC・SP別にアップロード）</div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+
+      <!-- PC -->
+      <div>
+        <div class="sub-label" style="margin-bottom:6px;">🖥 PC デザイン</div>
+        <div class="upload-box" id="designBoxPc" style="padding:16px 10px;">
+          <input type="file" id="designInputPc" accept="image/*" multiple>
+          <span class="upload-icon" style="font-size:20px;">🖥</span>
+          <div class="upload-sub" style="font-size:10px;">
+            <strong style="font-size:9px;">PC IMAGE</strong>
+            タップまたはドロップ
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:6px;">
+          <button class="file-pick-btn" style="font-size:10px;" onclick="document.getElementById('designInputPc').click()">📁 選ぶ</button>
+          <button class="file-pick-btn" style="font-size:10px;" onclick="document.getElementById('designInputPcCam').click()">📷 撮る</button>
+          <input type="file" id="designInputPcCam" accept="image/*" capture="environment" style="display:none" multiple>
+        </div>
+        <div id="imagePreviewGridPc" style="display:none;margin-top:8px;"></div>
       </div>
+
+      <!-- SP -->
+      <div>
+        <div class="sub-label" style="margin-bottom:6px;">📱 SP デザイン</div>
+        <div class="upload-box" id="designBoxSp" style="padding:16px 10px;">
+          <input type="file" id="designInputSp" accept="image/*" multiple>
+          <span class="upload-icon" style="font-size:20px;">📱</span>
+          <div class="upload-sub" style="font-size:10px;">
+            <strong style="font-size:9px;">SP IMAGE</strong>
+            タップまたはドロップ
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:6px;">
+          <button class="file-pick-btn" style="font-size:10px;" onclick="document.getElementById('designInputSp').click()">📁 選ぶ</button>
+          <button class="file-pick-btn" style="font-size:10px;" onclick="document.getElementById('designInputSpCam').click()">📷 撮る</button>
+          <input type="file" id="designInputSpCam" accept="image/*" capture="environment" style="display:none" multiple>
+        </div>
+        <div id="imagePreviewGridSp" style="display:none;margin-top:8px;"></div>
+      </div>
+
     </div>
-    <div style="display:flex;gap:8px;margin-top:8px;">
-      <button class="file-pick-btn" onclick="document.getElementById('designInput').click()">📁 ファイルから選ぶ</button>
-      <button class="file-pick-btn" onclick="document.getElementById('designInputCam').click()">📷 カメラで撮る</button>
-      <input type="file" id="designInputCam" accept="image/*" capture="environment" style="display:none" multiple>
+    <div style="font-size:10px;color:var(--text-dim);margin-top:8px;">
+      ※ PC・SPそれぞれ最大10枚・1枚4MB以内。片方だけでも可。<br>
+      ※ PC・SP別に分析して結果を統合するので、修正が混在しにくくなります。
     </div>
-    <div id="imagePreviewGrid" style="display:none;margin-top:10px;"></div>
-    <div style="font-size:10px;color:var(--text-dim);margin-top:7px;">※ Groq Vision上限: 1枚4MB以内・最大20枚まで</div>
   </div>
 
   <!-- STEP 2 -->
@@ -810,7 +913,9 @@
 </div>
 
 <script>
-let designImages = []; // [{b64, type, name}]
+let designImagesPc = []; // PC用 [{b64, type, name}]
+let designImagesSp = []; // SP用 [{b64, type, name}]
+let designImages   = []; // 後方互換（使用しない）
 let currentIssues = [], fixedHtmlContent = null;
 
 // ── Settings ───────────────────────────────────────
@@ -1000,8 +1105,8 @@ async function callAI(prompt, images = [], maxTokens = 1200) {
       return data.choices?.[0]?.message?.content?.trim() || '';
     } catch(e) {
       errors.push(`OpenRouter: ${e.message}`);
-      if (!e.isRateLimit) throw e;
-      updateLoadingText('OpenRouter上限。Claudeで再試行中...');
+      // OpenRouterは全エラーでGemmaにフォールバック（モデル不存在含む）
+      updateLoadingText('OpenRouter失敗。Gemmaで再試行中...');
     }
   }
 
@@ -1120,82 +1225,78 @@ async function onDrop(event, tab, zoneId) {
   affectedTabs.forEach(t => renderFileList(t));
 }
 
-// ── Image upload (複数対応) ────────────────────────
-(function() {
-  const input = document.getElementById('designInput');
-  const box   = document.getElementById('designBox');
+// ── Image upload PC/SP分割 ────────────────────────
+function setupDesignUpload(inputId, camId, boxId, previewId, store) {
+  const input  = document.getElementById(inputId);
+  const cam    = document.getElementById(camId);
+  const box    = document.getElementById(boxId);
 
   const handleFiles = files => {
     const arr = Array.from(files).filter(f => f.type.startsWith('image/'));
-    if (!arr.length) return;
-
-    const remaining = 20 - designImages.length;
-    if (remaining <= 0) {
-      showError('画像は最大20枚までです。');
-      return;
-    }
+    const remaining = 10 - store.list.length;
+    if (remaining <= 0) { showError('各グループ最大10枚までです。'); return; }
     const toAdd = arr.slice(0, remaining);
-
     toAdd.forEach(file => {
+      if (file.size > 4 * 1024 * 1024) { showError(`${file.name} が4MBを超えています。スキップ。`); return; }
       const r = new FileReader();
       r.onload = ev => {
-        const b64 = ev.target.result.split(',')[1];
-        if (b64.length > 4 * 1024 * 1024) {
-          showError(`${file.name} が4MBを超えています。スキップしました。`);
-          return;
-        }
-        designImages.push({ b64, type: file.type, name: file.name });
-        renderPreviews();
+        store.list.push({ b64: ev.target.result.split(',')[1], type: file.type, name: file.name });
+        renderDesignPreview(previewId, store);
       };
       r.readAsDataURL(file);
     });
-
-    if (arr.length > remaining) {
-      showError(`20枚制限のため ${arr.length - remaining} 枚スキップしました。`);
-    }
+    if (arr.length > remaining) showError(`10枚制限のため ${arr.length - remaining} 枚スキップしました。`);
   };
 
-  input.addEventListener('change', e => { handleFiles(e.target.files); input.value = ''; });
-
-  // カメラ入力も同じhandleFilesで処理
-  const camInput = document.getElementById('designInputCam');
-  if (camInput) {
-    camInput.addEventListener('change', e => { handleFiles(e.target.files); camInput.value = ''; });
+  if (input) {
+    input.addEventListener('change', e => { handleFiles(e.target.files); input.value = ''; });
   }
-  box.addEventListener('dragover',  e => { e.preventDefault(); box.classList.add('dragover'); });
-  box.addEventListener('dragleave', () => box.classList.remove('dragover'));
-  box.addEventListener('drop', e => {
-    e.preventDefault(); box.classList.remove('dragover');
-    handleFiles(e.dataTransfer.files);
-  });
-})();
-
-function renderPreviews() {
-  const grid = document.getElementById('imagePreviewGrid');
-  if (designImages.length === 0) {
-    grid.style.display = 'none';
-    grid.innerHTML = '';
-    return;
+  if (cam) {
+    cam.addEventListener('change', e => { handleFiles(e.target.files); cam.value = ''; });
   }
+  if (box) {
+    box.addEventListener('dragover',  e => { e.preventDefault(); box.classList.add('dragover'); });
+    box.addEventListener('dragleave', () => box.classList.remove('dragover'));
+    box.addEventListener('drop', e => {
+      e.preventDefault(); box.classList.remove('dragover');
+      handleFiles(e.dataTransfer.files);
+    });
+  }
+}
+
+function renderDesignPreview(previewId, store) {
+  const grid = document.getElementById(previewId);
+  if (!grid) return;
+  if (store.list.length === 0) { grid.style.display = 'none'; grid.innerHTML = ''; return; }
   grid.style.display = 'block';
   grid.innerHTML = `<div class="image-preview-grid">${
-    designImages.map((img, i) => `
+    store.list.map((img, i) => `
       <div class="preview-item">
         <img src="data:${img.type};base64,${img.b64}" alt="${escHtml(img.name)}">
-        <button class="remove-btn" onclick="removeImage(${i})" title="削除">×</button>
+        <button class="remove-btn" onclick="removeDesignImage('${previewId}',${i})" title="削除">×</button>
         <div class="img-label">${i + 1}. ${escHtml(img.name)}</div>
-      </div>
-    `).join('')
-  }</div>
-  <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--accent);margin-top:6px;">${designImages.length}/20 枚</div>`;
+      </div>`).join('')
+  }</div><div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--accent);margin-top:4px;">${store.list.length}/10 枚</div>`;
 }
 
-function removeImage(idx) {
-  designImages.splice(idx, 1);
-  renderPreviews();
+function removeDesignImage(previewId, idx) {
+  if (previewId === 'imagePreviewGridPc') {
+    designImagesPc.list.splice(idx, 1);
+    renderDesignPreview(previewId, designImagesPc);
+  } else {
+    designImagesSp.list.splice(idx, 1);
+    renderDesignPreview(previewId, designImagesSp);
+  }
 }
 
-// ── ファイル管理 ────────────────────────────────────
+// PC/SPストアオブジェクト
+designImagesPc = { list: [] };
+designImagesSp = { list: [] };
+
+setupDesignUpload('designInputPc',  'designInputPcCam', 'designBoxPc', 'imagePreviewGridPc', designImagesPc);
+setupDesignUpload('designInputSp',  'designInputSpCam', 'designBoxSp', 'imagePreviewGridSp', designImagesSp);
+
+// ── ファイル管理// ── ファイル管理 ────────────────────────────────────
 // files: { html: [{name, code, type}], css: [{name, code, type}], js: [{name, code, type}] }
 const files = { html: [], css: [], js: [] };
 let fileIdCounter = 0;
@@ -1517,7 +1618,11 @@ async function analyze() {
   const cssCode  = getAllCode('css');
   const jsCode   = getAllCode('js');
 
-  if (designImages.length === 0 && !htmlCode && !cssCode && !jsCode) {
+  const pcImages = designImagesPc.list || [];
+  const spImages = designImagesSp.list || [];
+  const totalImages = pcImages.length + spImages.length;
+
+  if (totalImages === 0 && !htmlCode && !cssCode && !jsCode) {
     showError('デザイン画像またはソースコードを入力してください。');
     return;
   }
@@ -1538,12 +1643,10 @@ async function analyze() {
   if (cssComp)  codeSection += `\n\n【CSS/SCSS】\n\`\`\`css\n${cssComp}\n\`\`\``;
   if (jsComp)   codeSection += `\n\n【JavaScript】\n\`\`\`js\n${jsComp}\n\`\`\``;
 
-  const useVision = designImages.length > 0;
-  const model = useVision ? 'meta-llama/llama-4-scout-17b-16e-instruct' : 'llama-3.3-70b-versatile';
-
+  const useVision = pcImages.length > 0 || spImages.length > 0;
   const prompt = `あなたはWebコーディング品質チェックの専門AIです。${codeSection}
 
-デザインカンプ${useVision ? `（画像 ${designImages.length} 枚）` : ''}と現状コードを比較・分析し、
+デザインカンプ${useVision ? `（PC ${pcImages.length}枚・SP ${spImages.length}枚）` : ''}と現状コードを比較・分析し、
 CSS/SCSSのズレや改善点を検出してください。SCSSの場合はSCSSセレクタで指摘してください。
 以下のJSON形式のみで返答してください（\`\`\`不要）。
 
@@ -1562,25 +1665,10 @@ CSS/SCSSのズレや改善点を検出してください。SCSSの場合はSCSS�
 
 issuesは最大8件。コードがある場合は実際のセレクタ名を使うこと。JSONのみ返答。`;
 
-  // 画像を5枚ずつのグループに分割
-  const CHUNK = 5;
-  const imageChunks = [];
-  for (let i = 0; i < designImages.length; i += CHUNK) {
-    imageChunks.push(designImages.slice(i, i + CHUNK));
-  }
-
-  // グループごとにAPI呼び出してissuesを集約
-  async function callChunk(chunk, chunkIdx, totalChunks) {
-    const chunkNote = totalChunks > 1 ? `（グループ ${chunkIdx + 1}/${totalChunks}）` : '';
-    const chunkPrompt = prompt + chunkNote;
-    const chunkImages = chunk.map((img, i) => ({
-      ...img,
-      name: `画像${chunkIdx * CHUNK + i + 1}: ${img.name}`
-    }));
-    if (totalChunks > 1) {
-      updateLoadingText(`グループ ${chunkIdx + 1}/${totalChunks} を解析中...`);
-    }
-    const text = await callAI(chunkPrompt, chunkImages, 1200);
+  // PC/SP別に分析してissuesを統合
+  async function analyzeGroup(images, label) {
+    const groupPrompt = prompt + (label ? `\n\n※ これは【${label}デザイン】の画像です。${label}向けのCSSを中心に指摘してください。` : '');
+    const text = await callAI(groupPrompt, images, 1200);
     try { return JSON.parse(text.replace(/```json|```/g, '').trim()); }
     catch { return { summary: text, issueCount: 0, issues: [] }; }
   }
@@ -1589,18 +1677,29 @@ issuesは最大8件。コードがある場合は実際のセレクタ名を使�
     let allIssues = [];
     let summaries = [];
 
-    if (useVision && imageChunks.length > 0) {
-      // 複数グループを順番に処理
-      for (let i = 0; i < imageChunks.length; i++) {
-        if (imageChunks.length > 1) {
-          document.querySelector('.loading-text').textContent =
-            `グループ ${i + 1}/${imageChunks.length} を解析中...`;
+    if (pcImages.length > 0 || spImages.length > 0) {
+      // PC分析
+      if (pcImages.length > 0) {
+        updateLoadingText('PC デザインを解析中...');
+        const result = await analyzeGroup(pcImages, 'PC');
+        if (result.summary) summaries.push(`[PC] ${result.summary}`);
+        if (result.issues) {
+          result.issues.forEach(issue => {
+            allIssues.push({ ...issue, _group: 'PC' });
+          });
         }
-        const result = await callChunk(imageChunks[i], i, imageChunks.length);
-        if (result.summary) summaries.push(result.summary);
-        if (result.issues) allIssues = allIssues.concat(result.issues);
-        // レート制限対策：グループ間に少し待機
-        if (i < imageChunks.length - 1) await new Promise(r => setTimeout(r, 800));
+        if (spImages.length > 0) await new Promise(r => setTimeout(r, 800));
+      }
+      // SP分析
+      if (spImages.length > 0) {
+        updateLoadingText('SP デザインを解析中...');
+        const result = await analyzeGroup(spImages, 'SP');
+        if (result.summary) summaries.push(`[SP] ${result.summary}`);
+        if (result.issues) {
+          result.issues.forEach(issue => {
+            allIssues.push({ ...issue, _group: 'SP' });
+          });
+        }
       }
     } else {
       // 画像なし：テキストのみで分析
@@ -1640,8 +1739,55 @@ issuesは最大8件。コードがある場合は実際のセレクタ名を使�
 }
 
 // ── Show Results ───────────────────────────────────
+// 各issueの適用ON/OFF状態
+let issueEnabled = [];
+
+function toggleIssue(idx, el) {
+  issueEnabled[idx] = el.checked;
+  const label = el.closest('.toggle-switch').nextElementSibling;
+  const card  = el.closest('.issue-card');
+  if (el.checked) {
+    label.textContent = '適用する';
+    label.classList.add('on');
+    card.classList.remove('disabled-fix');
+  } else {
+    label.textContent = '適用しない';
+    label.classList.remove('on');
+    card.classList.add('disabled-fix');
+  }
+  updateSelectAllState();
+}
+
+function selectAll(enable) {
+  issueEnabled = issueEnabled.map(() => enable);
+  document.querySelectorAll('.issue-toggle-input').forEach((el, idx) => {
+    el.checked = enable;
+    const label = el.closest('.toggle-switch').nextElementSibling;
+    const card  = el.closest('.issue-card');
+    if (enable) {
+      label.textContent = '適用する';
+      label.classList.add('on');
+      card.classList.remove('disabled-fix');
+    } else {
+      label.textContent = '適用しない';
+      label.classList.remove('on');
+      card.classList.add('disabled-fix');
+    }
+  });
+  updateSelectAllState();
+}
+
+function updateSelectAllState() {
+  const total   = issueEnabled.length;
+  const enabled = issueEnabled.filter(Boolean).length;
+  const info    = document.getElementById('selectAllInfo');
+  if (info) info.textContent = `${enabled} / ${total} 件を適用`;
+}
+
 function showResults(data) {
   currentIssues = data.issues || [];
+  issueEnabled  = currentIssues.map(() => true); // 全てデフォルトON
+
   const count = typeof data.issueCount === 'number' ? data.issueCount : currentIssues.length;
   const countEl = document.getElementById('issueCount');
   countEl.textContent = `${count} issues`;
@@ -1650,29 +1796,56 @@ function showResults(data) {
 
   const list = document.getElementById('issueList');
   list.innerHTML = '';
+
   if (currentIssues.length === 0) {
     list.innerHTML = '<div class="issue-card ok-card"><div class="issue-selector">✅ 問題なし</div><div class="issue-desc">大きなズレは検出されませんでした。</div></div>';
   } else {
+    // 全選択・全解除バー
+    const bar = document.createElement('div');
+    bar.className = 'select-all-row';
+    bar.innerHTML = `
+      <span id="selectAllInfo">${count} / ${count} 件を適用</span>
+      <button class="select-btn" onclick="selectAll(true)">全て適用</button>
+      <button class="select-btn" onclick="selectAll(false)">全て解除</button>
+    `;
+    list.appendChild(bar);
+
     currentIssues.forEach((issue, i) => {
-      const sev = issue.severity || 'medium';
+      const sev      = issue.severity || 'medium';
       const sevClass = sev === 'high' ? 'sev-high' : sev === 'medium' ? 'sev-med' : 'sev-low';
       const sevLabel = sev === 'high' ? 'HIGH' : sev === 'medium' ? 'MED' : 'LOW';
       const cardClass = sev === 'high' ? '' : sev === 'medium' ? ' warning' : ' ok-card';
       const card = document.createElement('div');
       card.className = `issue-card${cardClass}`;
       card.style.animationDelay = `${i * 0.05}s`;
+
+      const fixHtml = issue.fix
+        ? `<div class="issue-fix">${escHtml(issue.fix)}</div>
+           <button class="copy-btn" onclick="copyText(this,\`${issue.fix.replace(/`/g,"'")}\`)">📋 コピー</button>`
+        : '';
+
+      const groupBadge = issue._group
+        ? `<span style="font-family:'Space Mono',monospace;font-size:8px;padding:2px 5px;border-radius:3px;margin-left:5px;background:${issue._group==='PC'?'rgba(100,149,237,0.2)':'rgba(168,85,247,0.2)'};color:${issue._group==='PC'?'#6495ed':'#a855f7'};">${issue._group}</span>`
+        : '';
       card.innerHTML = `
-        <div class="issue-selector">${escHtml(issue.selector||'要素不明')}<span class="severity-badge ${sevClass}">${sevLabel}</span></div>
+        <div class="issue-toggle-row">
+          <div class="issue-selector">${escHtml(issue.selector||'要素不明')}<span class="severity-badge ${sevClass}">${sevLabel}</span>${groupBadge}</div>
+          <label class="toggle-switch" title="この修正を適用する/しない">
+            <input type="checkbox" class="issue-toggle-input" checked onchange="toggleIssue(${i}, this)">
+            <span class="toggle-slider"></span>
+          </label>
+          <span class="toggle-label on">適用する</span>
+        </div>
         <div class="issue-desc">${escHtml(issue.description||'')}</div>
-        ${issue.fix ? `<div class="issue-fix">${escHtml(issue.fix)}</div><button class="copy-btn" onclick="copyText(this,\`${issue.fix.replace(/`/g,"'")}\`)">📋 コピー</button>` : ''}
+        ${fixHtml}
       `;
       list.appendChild(card);
     });
   }
 
   document.getElementById('results').classList.add('show');
-  const hasHtml = getAllCode('html');
-  document.getElementById('fixPanel').classList.toggle('show', currentIssues.length > 0 && !!hasHtml);
+  const hasCode = getAllCode('html') || getAllCode('css');
+  document.getElementById('fixPanel').classList.toggle('show', currentIssues.length > 0 && !!hasCode);
   document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
@@ -1700,10 +1873,17 @@ async function autoFix() {
 
   const jsRequest = document.getElementById('jsRequestInput')?.value.trim() || '';
 
-  const fixList = currentIssues
+  // issueEnabledがtrueのものだけ適用
+  const enabledIssues = currentIssues.filter((_, idx) => issueEnabled[idx] !== false);
+  const fixList = enabledIssues
     .filter(i => i.fix)
     .map((i, idx) => `${idx + 1}. ${i.selector} { ${i.fix} }`)
     .join('\n');
+
+  if (fixList.length === 0 && !document.getElementById('jsRequestInput')?.value.trim()) {
+    showError('適用する修正が選択されていません。トグルで修正を選択してください。');
+    return;
+  }
 
   setFixLoading(true);
   fixedFiles = [];
@@ -1741,110 +1921,30 @@ async function autoFix() {
   }
 
   // HTMLファイルから<style>タグを抽出してCSSファイルに移動
-  const extractedCssParts = [];
-  const extractedJsParts  = [];
-
-  const processedHtmlFiles = allFiles
-    .filter(f => f.tab === 'html')
-    .map(f => {
-      const fname = f.name || 'index.html';
-      let html = f.code;
-
-      // ── <style> 抽出 ──────────────────────────────
-      const styleReg = /<style[^>]*>([\s\S]*?)<\/style>/gi;
-      const cssExtracted = [];
-      let match;
-      while ((match = styleReg.exec(html)) !== null) {
-        cssExtracted.push(match[1].trim());
-      }
-      if (cssExtracted.length > 0) {
-        extractedCssParts.push(...cssExtracted);
-        html = html.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
-        // 既存のCSSファイルリンクがなければ追加（パス問わず.cssへの参照を確認）
-        const hasCssLink = /href=["'][^"']*\.css["']/i.test(html);
-        if (!hasCssLink) {
-          const linkTag = '<link rel="stylesheet" href="style.css">';
-          html = html.includes('</head>')
-            ? html.replace('</head>', `  ${linkTag}\n</head>`)
-            : linkTag + '\n' + html;
-        }
-      }
-
-      // ── <script> 抽出（src属性のない内部スクリプトのみ）──
-      const scriptReg = /<script(?![^>]*\bsrc\b)[^>]*>([\s\S]*?)<\/script>/gi;
-      const jsExtracted = [];
-      scriptReg.lastIndex = 0;
-      while ((match = scriptReg.exec(html)) !== null) {
-        const code = match[1].trim();
-        if (code) jsExtracted.push(code);
-      }
-      if (jsExtracted.length > 0) {
-        extractedJsParts.push(...jsExtracted);
-        // 内部スクリプトタグを削除
-        html = html.replace(/<script(?![^>]*\bsrc\b)[^>]*>[\s\S]*?<\/script>/gi, '');
-        // 既存の<script src="script.js">がなければ</body>直前に追加
-        const scriptTag = '<scr' + 'ipt src="script.js"></scr' + 'ipt>';
-        // パス問わずscript.jsへの参照が既にあれば追加しない
-        const hasScriptLink = /src=["'][^"']*script\.js["']/i.test(html)
-          || /src=["'][^"']*\.js["']/i.test(html);
-        if (!hasScriptLink) {
-          html = html.includes('</body>')
-            ? html.replace('</body>', `  ${scriptTag}\n</body>`)
-            : html + `\n${scriptTag}`;
-        }
-      }
-
-      return { ...f, code: html, name: fname };
-    });
-
   // 各ファイルに修正を適用
+  // HTMLはそのまま出力（パスを維持）
+  // CSSは修正適用済みで書き換え
+  // JSはそのまま（AI指示があれば後で上書き）
   allFiles.forEach(f => {
     const fname = f.name || (f.tab === 'html' ? 'index.html' : f.tab === 'css' ? 'style.css' : 'script.js');
     let fixed = f.code;
 
-    if (f.tab === 'html') {
-      const processed = processedHtmlFiles.find(p => p.name === fname);
-      fixed = processed ? processed.code : f.code;
-    } else if (f.tab === 'css') {
-      const extracted = extractedCssParts.length > 0
-        ? `/* HTMLから移動 */\n${extractedCssParts.join('\n\n')}\n\n`
-        : '';
-      fixed = extracted + cssBlock;
-    } else if (f.tab === 'js') {
-      // JSファイルがある場合：抽出したJSを先頭に追加
-      const extracted = extractedJsParts.length > 0
-        ? `/* HTMLから移動 */\n${extractedJsParts.join('\n\n')}\n\n`
-        : '';
-      fixed = extracted + f.code;
+    if (f.tab === 'css') {
+      fixed = cssBlock;
     }
 
-    // SCSSタイプのファイルは.scssで出力し、CSSも併せて出力
+    // SCSSは.scssで出力しCSS版も同時出力
     let fixedName = fname;
     if (f.tab === 'css' && f.type === 'scss') {
       fixedName = fname.replace(/\.css$/i, '.scss');
       fixedFiles.push({ name: fixedName, content: fixed, mime: 'text/css' });
-      // CSS版も同時出力（拡張子は元のまま .css）
-      fixedFiles.push({ name: fname, content: fixed, mime: 'text/css' });
+      fixedFiles.push({ name: fname,      content: fixed, mime: 'text/css' });
     } else {
       fixedFiles.push({ name: fixedName, content: fixed, mime: f.mime });
     }
   });
 
-  // HTMLから抽出したCSSがあるがCSSファイルがない場合、新規 style.css を作成
-  if (extractedCssParts.length > 0 && !allFiles.some(f => f.tab === 'css')) {
-    const newCss = `/* HTMLから移動 */\n${extractedCssParts.join('\n\n')}\n\n/* PixelPerfect Layer - AI修正 ${date} */\n${cssBlock}`;
-    // SCSSファイルが1つでもあればscssで出力
-    const hasScss = allFiles.some(f => f.tab === 'css' && f.type === 'scss');
-    fixedFiles.push({ name: hasScss ? 'style.scss' : 'style.css', content: newCss, mime: 'text/css' });
-  }
-
-  // HTMLから抽出したJSがあるがJSファイルがない場合、新規 script.js を作成
-  if (extractedJsParts.length > 0 && !allFiles.some(f => f.tab === 'js')) {
-    const newJs = `/* HTMLから移動 */\n${extractedJsParts.join('\n\n')}`;
-    fixedFiles.push({ name: 'script.js', content: newJs, mime: 'text/javascript' });
-  }
-
-  // ── JS指示がある場合：AIにJS修正を依頼して該当ファイルを上書き ──
+    // ── JS指示がある場合：AIにJS修正を依頼して該当ファイルを上書き ──
   if (jsRequest) {
     document.querySelector('#fixLoading .loading-text').textContent = 'JavaScriptを修正中...';
 
@@ -1891,8 +1991,9 @@ async function autoFix() {
   reportLines.push('【CSS修正内容一覧】');
   reportLines.push('-'.repeat(40));
   currentIssues.forEach((issue, i) => {
-    const sev = issue.severity === 'high' ? '🔴 HIGH' : issue.severity === 'medium' ? '🟡 MED' : '🟢 LOW';
-    reportLines.push(`${i + 1}. [${sev}] ${issue.selector || '不明'}`);
+    const sev     = issue.severity === 'high' ? '🔴 HIGH' : issue.severity === 'medium' ? '🟡 MED' : '🟢 LOW';
+    const applied = issueEnabled[i] !== false ? '✅ 適用' : '⏭ スキップ';
+    reportLines.push(`${i + 1}. [${sev}] ${applied} ${issue.selector || '不明'}`);
     reportLines.push(`   問題: ${issue.description || ''}`);
     if (issue.fix) reportLines.push(`   修正: ${issue.fix}`);
     reportLines.push('');
@@ -1994,9 +2095,10 @@ function showError(msg) {
   el.classList.add('show');
 }
 function resetAll() {
-  designImages = []; fixedHtmlContent = null; fixedFiles = []; currentIssues = [];
+  designImagesPc = { list: [] }; designImagesSp = { list: [] }; fixedHtmlContent = null; fixedFiles = []; currentIssues = []; issueEnabled = [];
   files.html = []; files.css = []; files.js = [];
-  renderPreviews();
+  renderDesignPreview('imagePreviewGridPc', designImagesPc);
+  renderDesignPreview('imagePreviewGridSp', designImagesSp);
   renderFileList('html'); renderFileList('css'); renderFileList('js');
   document.getElementById('designInput').value = '';
   const jsReqEl = document.getElementById('jsRequestInput');
@@ -2012,6 +2114,10 @@ function resetAll() {
 
 loadKeys();
 initFiles();
+// ページ読み込み時は必ず先頭表示
+window.scrollTo({ top: 0 });
+// initFilesのDOM更新後も先頭に戻す
+setTimeout(() => window.scrollTo({ top: 0 }), 100);
 </script>
 </body>
 </html>
