@@ -969,10 +969,8 @@ async function callAI(prompt, images = [], maxTokens = 1200) {
   const openrouterKey = getOpenRouterKey();
   if (openrouterKey) {
     try {
-      // openrouter/free は Vision対応を含む無料モデルを自動選択
-      const orModel = useVision
-        ? 'qwen/qwen2.5-vl-32b-instruct:free'
-        : 'openrouter/auto';
+      // openrouter/free が利用可能な無料モデルを自動選択（Vision対応含む）
+      const orModel = 'openrouter/free';
       let orContent;
       if (useVision) {
         orContent = [];
